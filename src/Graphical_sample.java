@@ -15,23 +15,38 @@ public class Graphical_sample extends JFrame{
 
 	  Graphical_sample(String title){
 	    setTitle(title);
-	    setBounds(0, 0, 640, 480);
+	    setBounds(0, 0, 800, 608);
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	    JPanel p = new JPanel();
 	    p.setLayout(null);
 
+	    SetBlock(GenerateLabel("block_a.png",448, 64, 128, 128),p);
+	    SetBlock(GenerateLabel("block_b.png",64, 224, 128, 128),p);
+	    SetBlock(GenerateLabel("block_c.png",64, 96, 128, 128),p);
 
-	    SetBlock(GenerateLabel("block_a.png",0, 0, 128, 128),p);
-	    SetBlock(GenerateLabel("block_b.png",128, 0, 128, 128),p);
-	    SetBlock(GenerateLabel("block_c.png",256, 0, 128, 128),p);
-
-	    JLabel floor = GenerateLabel("floor.png",0, 352, 640, 128);
+	    JLabel arm = GenerateLabel("arm.png",438, 0, 148, 128);
+	    p.add(arm);
+	    
+	    JLabel floor = GenerateLabel("floor.png",0, 480, 640, 128);
 	    p.add(floor);
 	    
 	    Container contentPane = getContentPane();
 	    contentPane.add(p, BorderLayout.CENTER);
 	  }
+	  
+	  //arm
+	  //448, 64
+	  
+	  //plain
+	  //64, 352
+	  //256, 352
+	  //448, 352
+	  
+	  //exist
+	  //64, 224
+	  //64, 96
+	  //256, 224
 	  
 	  private JLabel GenerateLabel(String imgName, int x, int y, int witdh, int height)
 	  {
