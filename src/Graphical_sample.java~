@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+<<<<<<< HEAD
 public class Graphical_sample extends JPanel
 {
 private static float scale;
@@ -170,7 +171,7 @@ return true;
 return false;
 }
 }
-
+=======
 
 public class Graphical_sample extends JPanel
 {
@@ -363,5 +364,5 @@ public class Graphical_sample extends JPanel
 		}
 
 	}
-
+>>>>>>> 28df7db165c48ab46291d7832eae39c991e3dd28
 }

@@ -10,7 +10,10 @@ import javax.swing.JSeparator;
 import java.awt.Panel;
 import java.awt.Canvas;
 import java.awt.Color;
+<<<<<<< HEAD
+=======
 
+>>>>>>> 28df7db165c48ab46291d7832eae39c991e3dd28
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.JButton;
@@ -66,6 +69,7 @@ JScrollPane scrollPane_2 = new JScrollPane();
 scrollPane_2.setBounds(820, 40, 170, 179);
 contentPane.add(scrollPane_2);
 
+<<<<<<< HEAD
 final JTextArea area = new JTextArea();
 scrollPane_2.setViewportView(area);
 JLabel lblProcess = new JLabel("Process");
@@ -92,7 +96,7 @@ contentPane.add(btnBack);
 JButton btnGo = new JButton("Go");
 btnGo.setBounds(960, 234, 80, 25);
 contentPane.add(btnGo);
-
+=======
 	private JPanel contentPane;
 	Graphical_sample start_arrange;
 	
@@ -177,7 +181,7 @@ contentPane.add(btnGo);
 	    	Planner planner = new Planner();
 	    }
 	}
-
+>>>>>>> 28df7db165c48ab46291d7832eae39c991e3dd28
 }
 
 }
