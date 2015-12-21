@@ -1,11 +1,14 @@
 import javax.swing.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-public class Graphical_sample extends JFrame{
+public class Graphical_sample extends JFrame
+{
 	public static void main(String args[]){
 		Graphical_sample frame = new Graphical_sample("タイトル");
 		frame.setVisible(true);
@@ -33,6 +36,8 @@ public class Graphical_sample extends JFrame{
 			y = Y;
 			state = State.DISABLE;
 			label = GenerateLabel("empty.png",x, y, 128, 128);
+//			new Timer(30,(ActionListener) label).start(); 
+			//イベントリスナー定義してタイマーオブジェクトをいじる
 		}
 	}
 
@@ -109,6 +114,10 @@ public class Graphical_sample extends JFrame{
 		private int init_y;
 		private String key;
 
+//		public void actionPerformed(ActionEvent e){
+//			System.out.println("aaa");
+//		} 
+		
 		public MyMouseListener(String key)
 		{
 			this.key = key;
