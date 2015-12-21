@@ -11,7 +11,7 @@ public class Planner {
  private ArrayList<Operator> plan;
 
  private int count;
- private int max = 100; 
+ private int max = 100;
  
  public static void main(String argv[]){
 	 Planner aPlanner = new Planner();
@@ -680,7 +680,33 @@ public class Planner {
 	 return result;
  }
  
-
+ /*未使用
+ private boolean contain(ArrayList<String> list, String name) {
+	for(int i = 0; i < list.size(); ++i){
+		StringTokenizer st1 = new StringTokenizer(name);
+		int size = st1.countTokens();
+		StringTokenizer st2 = new StringTokenizer(list.get(i));
+		if(size == st2.countTokens()){
+			boolean success = false; 
+			for(int j = 0 ; j < size; ++j){
+				String tmp1 = st1.nextToken();
+				String tmp2 = st2.nextToken();
+				if(tmp1.equals(tmp2)){
+					success = true;
+				}else if(var(tmp2)){
+					success = true;
+				}else{
+					success = false;
+				}
+			}
+			if(success){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+*/
 
  //与えられた文字列の変数を指定の変数束縛情報を用いて束縛するメソッド
 private String instantiateString(String thePattern, HashMap<String,String> theBinding){
@@ -718,8 +744,8 @@ private String instantiateString(String thePattern, HashMap<String,String> theBi
   ArrayList<String> goalList = new ArrayList<String>();
   goalList.add("A on B");
   goalList.add("B on C");
- // goalList.add("C on D");
-  /*goalList.add("D on E");
+/*goalList.add("C on D");
+  goalList.add("D on E");
   goalList.add("E on F");
   goalList.add("clear A"); 
   goalList.add("A on C");
@@ -732,23 +758,23 @@ private String instantiateString(String thePattern, HashMap<String,String> theBi
     
  private ArrayList<String> initInitialState(){
 	 ArrayList<String> initialState = new ArrayList<String>();
-	 //initialState.add("F on E");
-	 //initialState.add("E on D");
-	// initialState.add("D on C");
+	/* initialState.add("F on E");
+	 initialState.add("E on D");
+	 initialState.add("D on C");
 	 initialState.add("C on B");
 	 initialState.add("B on A");
-	 initialState.add("ontable A"); 
-	 //initialState.add("clear A");
-	// initialState.add("ontable B");
-	// initialState.add("clear B");
-	 //initialState.add("ontable C");
+	 initialState.add("ontable A"); */
+	 initialState.add("clear A");
+	 initialState.add("ontable B");
+	 initialState.add("clear B");
+	 initialState.add("ontable C");
 	 initialState.add("clear C");
-	 //initialState.add("ontable D");
-	 //initialState.add("clear D");
-	 //initialState.add("ontable E");
-	 //initialState.add("clear E");
-	 //initialState.add("ontable F"); 
-	 //initialState.add("clear F"); 
+	/* initialState.add("ontable D");
+	 initialState.add("clear D");
+	 initialState.add("ontable E");
+	 initialState.add("clear E");
+	 initialState.add("ontable F"); 
+	 initialState.add("clear F"); */
 
 	 initialState.add("handEmpty");
 

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!--
+   デフォルトのスタイル
+   より見やすく変更しても良い
+  -->
+  <link rel="stylesheet" href="default.css"/>
+
+  <!--
+    SyntaxHighlighter 3.0.83 (http://alexgorbatchev.com/SyntaxHighlighter/)
+    Java のコードを読みやすくする
+  -->
+  <link rel="stylesheet" href="shCore.css"/>
+  <link rel="stylesheet" href="shThemeDjango.css"/>
+  <script src="shCore.js"></script>
+  <script src="shBrushJava.js"></script>
+　<script src="shBrushPlain.js"></script>
+  <script>SyntaxHighlighter.all();</script>
+
+  <!--
+    目次を動的に生成する
+  -->
+  <script src="outliner.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      // 第一引数: アウトライン対象の要素のセレクタ，第二引数: アウトラインを格納する要素のセレクタ．
+      new TOutliner('h2', '#outline');
+    });
+  </script>
+
+  <title>知能プログラミング演習II 個人用レポート7</title>
+</head>
+
+<body>
+<header>
+  <!-- 学籍番号・名前を書く．-->
+  <h1>25115143 宮部　諒</h1>
+
+  <!-- 目次生成用 -->
+  <nav id="outline"></nav>
+</header>
+<h2>グループ8</h2>
+
+24115111 林　　俊介 <br>
+25115099 土井　崇史<br>
+25115107 中地　功貴<br>
+25115143 宮部　諒<br>
+25115161 米田　一樹<br>
+
+<h2>自分の担当</h2>
+効果的なオペレータ間の競合解消のための戦略を考察し，プランニングシステムを実装（主に課題7-1）
+
+<h2>ソースファイル</h2>
+<ul>
+<li><a href="../../Planner/src/Planner.java">Planner.java</a>
+
+<!-- 実装・変更したソースファイルへのリンク．修正する． -->
+<!-- ※ リンクは絶対パスに変更せず，上記のような相対パスのままで！ -->
+</ul>
+
+<h2>必須課題7-1</h2>
+<!-- 課題を書-く．-->
+効果的なオペレータ間の競合解消のための戦略を考察し，プランニングシステムへ実装せよ（教科書p. 148 練習問題1）．
+少なくとも2種類以上の競合解消戦略を試し，グループ作成資料の「考察」中で優劣を比較・検討せよ．
+
+<h3>仕様説明</h3>
+今回、プログラムのソースが大規模になりトータルで1000行を超えてしまったので、１つ１つプログラムを追って説明するとわかりにくいため、大まかな流れを説明する。そのために、頻繁に出てくる用語、重要な単語について解説する。
+
+<br><br>
+
+<h4>用語説明</h4>
+<h5>オペレータ(Operator)</h5>
+ブロックを掴む、ブロックを置くといった一つ一つの命令。今回の課題ではSTRIPSというプランニング手法の基本の表現を使っている。今回のソース中では４つオペレータを定義している。　以下はその中の1つである。
+
+<pre class="brush:text">
+NAME	Place ?x on ?y　
+IF		clear ?y
+ 		holding ?x
+ADD		?x on ?y
+		clear ?x
+		handEmpty
+DELETE	clear ?y
+		holding ?x
+</pre>
+これは、?yの上に?xを置くという動作を示すオペレータである。オペレータはIF ADD DELETEの3つの構造に分かれる。
+?yの上に?xを置くためには、条件として、?yの上に何もない(clear ?y)　?xを掴んでいる(holding ?x)である必要がある。
+ここが前件部(IF）である。後件部は、ADDとDELETEに分かれ、ADDは置いた後の状態を記述している。　DELETEは動作をすることによって失われた状態である。DELETEは基本的にはIFと同じになることが多い。このソース中では、Operetorクラスを定義し、それをArrayListで管理、さらに　IF　ADD　DELETEもArrayListで管理している。　すなわち、２重にArrayListを作って管理している。
+
+<br><br>
+
+<h5>サブゴール</h5>
+目標の状態に持って行くために、その目標を達成するために必要なプロセスとして、小さな目標を立てる。それをサブゴールという。
+サブゴールをクリアすることで、サブゴールをクリアするために行った動作のオペレータのIF部を初期状態に加え、新たな初期状態とする。それを繰り返すことで、サブゴールを何度も達成するうちに目標のゴールへと達成することが可能になる。
+
+<br><br>
+
+<h5>貢献度</h5>
+今回のプランニングのソース中で、新たに導入した指標である。オペレータのペアに対して、一方がもう一方にどれだけ貢献する可能性があるかの尺度を全てのペアについて計算し、行列として保持している。　今回のソース中では、定義は、
+オペレータA(opA)のオペレータB(opB)に対する貢献度　=（opAのADDリストに含まれるopBのIFリストの要素数　+ opBのDELETEリストに含まれるopAのIFリストの要素数） (>= 0)　としている。　この貢献度がどのように使われるかは後で示す。
+
+<br><br>
+
+<h5>優先度(priority)</h5>
+これも今回のプランニングで新たに導入した指標である。オペレータの競合解消を行うために使う尺度で、今回のソース内では、
+動的優先度と静的優先度を２種類定義し、動的優先度が同じだった場合、静的優先度の高いオペレータを選択するようにしている。
+
+<br><br>
+
+<h4>メソッド・クラス説明</h4>
+クラスは、プランニングを行うPlannerクラス、オペレータの定義や引数を返すOperatorクラス、Unifyクラス　の３つに分かれる。
+ここではクラスの大まかな流れを説明する。
+
+<h5>Plannerクラス</h5>
+
+<ol>
+<li>ゴールリストをプランニングしやすいようにソートするメソッド</li>
+<li>ゴールリストに対するプランニングを行うメソッド</li>
+<li>ゴールリストの1要素に対してプランニングを行うメソッド</li>
+<li>オペレータが競合になった場合に競合解消をするメソッド</l1>
+<li>ゴールの状態、初期状態、主なオペレータを定義するメソッド</li>
+</ol>
+
+<h5>Operatorクラス</h5>
+
+<ol>
+<li>Operatorの構造を示すコンストラクタ</li>
+<li>Operatorの優先度をセット、または返すメソッド</li>
+<li>Operatorを具体化するメソッド</li>
+</ol>
+
+<h5>Unifyクラス</h5>
+Unifyを行うクラス（ほとんど前回の演習で用いたものと同じ）
+
+<br><br>
+
+<h4>詳細なソースの仕様説明</h4>
+今回のソースの一番重要な点である、競合戦略解消で優先度を導入した部分と、ゴールをプランニングしやすいようにソートする部分で使った貢献度について詳しくソースを見ながら説明していく。
+
+<br>
+
+<h5>sortGoals部分</h5>
+ゴールのソート部分の大まかな流れは、
+
+<ol>
+<li>それぞれのゴール要素をADDリストに持つオペレータを一つずつ決定する。</li>
+<li>１で複数ある場合、静的優先度に基づきオペレータを一つに絞る。</li>
+<li>ゴール要素のオペレータの全てのペアのついて貢献度を計算し、行列化する。</li>
+<li>非貢献度が最小のオペレータを調べる。複数ある場合は複数保持</l1>
+<li>３の最小のオペレータを初期値とし、貢献度を参考にオペレータを取り出し、ソートする</li>
+</ol>
+
+ここで
+貢献度を計算している部分のソースを示す。
+
+<pre class="brush:java">
+ int size = operatorsMap.size();
+	 Integer[][] contributionMat = new Integer[size][size];
+	 //rowContributed は行列の各行の貢献度の和（各オペレータの非貢献度の和と考えられる）を要素に持つリスト
+	 Integer[] rowContributed = new Integer[size];
+	 for(int i = 0; i < size; ++i){
+		 rowContributed[i] = 0;
+		 for(int j = 0; j < size; ++j){
+			 contributionMat[i][j] = 0;
+		 }
+	 }
+	 for(int i = 0; i < size; ++i){
+		 Operator columnOp = theOperators.get(i);
+		 ArrayList<String> columnAddList = columnOp.getAddList();
+		 ArrayList<String> columnDeleteList = columnOp.getDeleteList();
+		 for(int j = 0; j < size; ++j){
+			 Operator rowOp = theOperators.get(j);
+			 ArrayList<String> rowIfList = rowOp.getIfList();
+			 if(i != j){
+				 for(int k = 0; k < rowIfList.size(); ++k){
+					 for(int l = 0; l < columnAddList.size(); ++l){
+						 if(rowIfList.get(k).equals(columnAddList.get(l))){
+						// if((new Unifier()).unify(rowIfList.get(k), columnAddList.get(l))){
+							 contributionMat[i][j]++;
+							 rowContributed[j]++;
+						 }
+					 }
+					 for(int l = 0; l < columnDeleteList.size(); ++l){
+						 if(rowIfList.get(k).equals(columnDeleteList.get(l))){
+						 //if((new Unifier()).unify(rowIfList.get(k), columnDeleteList.get(l))){
+							 contributionMat[j][i]++;
+							 rowContributed[i]++;
+						 }
+					 }
+				 }
+			 }
+		 }
+	 }
+	 
+	 //貢献度行列表示
+	 for(int i =0; i<size; ++i){
+		 for(int j =0;j<size;++j){
+			 System.out.print(contributionMat[i][j]+" ");
+		 }
+		 System.out.println("");
+	 }
+	
+
+></pre>
+
+ここで重要なのはrowContributedで、この引数は各行の貢献度の和（各オペレータの非貢献度）を示しており、
+ステップ３ではこの値の最小値を初期値として計算している。
+
+<br><br>
+
+<h5>競合解消戦略部分</h5>
+今回のプランニングのソースで用いた競合解消戦略では、優先度をオペレータやインスタンシエーションに設定することで
+競合を解消している。さらに、過去に使用したインスタンシエーションを捨てることで、競合が起こる可能性も下げているのも特徴である。
+優先度の定義は、今回は静的優先度と動的優先度の2種類を利用した。以下がその部分である。
+
+<pre class="brush:java">
+private void staticPrioritySet(){
+	 //静的な優先度 = オペレータのIFリスト長 - ADDリスト長 - DELETEリスト長
+	 for(int i = 0; i < operators.size(); ++i){
+		 Operator anOperator = operators.get(i);
+		 int priority = (anOperator).getIfList().size()   
+		 	- (anOperator).getAddList().size()
+		 	- (anOperator).getDeleteList().size();
+		 operators.get(i).setPriority(priority);
+	 }
+></pre>
+
+<pre class="brush:java">
+private HashMap<Operator,HashMap<String,String>> dynamicPrioritySet(
+		 ArrayList<String> theCurrentState,
+		 ArrayList<String> theGoalList, 
+		 HashMap<Operator,HashMap<String,String>> theConflictSet){
+	 
+	 HashMap<Operator,HashMap<String,String>> result = new HashMap<Operator,HashMap<String,String>>();
+//	System.out.println(allGoals);
+	 for(Iterator ite = theConflictSet.keySet().iterator(); ite.hasNext();){
+		 Operator anOperator = (Operator)ite.next();
+		 HashMap<String,String> theBinding = (HashMap<String,String>)theConflictSet.get(anOperator);
+		 Operator theInstantiation = anOperator.instantiate(theBinding);
+		
+		 //過去に使用したインスタンシエーションを削除する
+		 ArrayList<String> tmpInstantiations = new ArrayList<String>();
+		 for(int i = 0; i < preInstantiations.size(); ++i){
+			 String instantiatedName = instantiateString(preInstantiations.get(i),theBinding);
+			 tmpInstantiations.add(instantiatedName);
+		 }
+		 if(!tmpInstantiations.contains(theInstantiation.name)){
+			 
+		System.out.println(theInstantiation.name + preInstantiations);
+		 int contribution = 0;
+		 ArrayList<String> theIfList = theInstantiation.getIfList();
+		 ArrayList<String> theAddList = theInstantiation.getAddList();
+		 ArrayList<String> theDeleteList = theInstantiation.getDeleteList();
+		
+		 //現ワーキングメモリの要素でIFリストの要素が満足できるなら、それを優先する
+		 HashMap<String,String> aBindings = new HashMap<String,String>();
+		 for(int i = 0; i < theCurrentState.size(); ++i){
+			 for(int j = 0; j < theIfList.size(); ++j){
+				 if((new Unifier()).unify(theCurrentState.get(i),theIfList.get(j),aBindings)){
+					contribution++; 
+				 }
+			 }
+		 }
+		 //IFリスト長の違いを無視するため、IFリスト長で割る
+		 contribution /= theIfList.size();
+		 
+		 //ユーザに与えられたゴール状態を1階層展開したものと、ADD、DELETEリストとのマッチングを調べる
+		 aBindings.clear();
+		 HashMap<String,String> bBindings = new HashMap<String,String>();
+		 for(int j = 0; j < allGoals.size(); ++j){
+			 for(int k = 0; k < theAddList.size(); ++k){
+				 if((new Unifier()).unify(allGoals.get(j),theAddList.get(k),aBindings)){
+					 //ADDリスト要素とマッチするならそれを優先
+					 contribution++;
+				 }
+			 }
+			 for(int l = 0; l < theDeleteList.size(); ++l){
+				 if((new Unifier()).unify(allGoals.get(j),theDeleteList.get(l),bBindings)){
+		 			//目標状態をDELETEする可能性があるオペレータの優先度を下げる
+					 contribution--;
+				 }
+			 }
+		 }
+		 
+		 theInstantiation.setPriority(contribution);
+		 System.out.println(theInstantiation.name + " -> " + theInstantiation.getPriority());
+		 result.put(theInstantiation, theBinding);
+		 }
+	 }
+	 return result;
+ }
+</pre>
+
+上が静的部分で下が動的部分である。
+静的な優先度 = オペレータのIFリスト長 - ADDリスト長 - DELETEリスト長　とし、オペレータのIF部分が大きく、ADD　DELETE部分が小さいもの、つまり、より特定的な条件で、
+あまり変化がないような動作ほど重要な動作であるとして、尺度を定めた。　動的優先度では、優先度(上のソースにおけるcontributionにあたる）に注目すると、動的優先度が上がるものは、現ワーキングメモリの要素でIFリストを満足できるもの、与えられたゴール状態を１階層展開（与えられたゴール状態にたどり着くための、サブゴールを設定すること）し、ADD　DELETEを調べることで、ADDにマッチするならば優先度を上げ、DELETEにマッチするならば優先度を下げることで、動的に優先度が変化して、より競合を解消できるようになっている。
+
+
+<hr>
+
+<h3>実行結果</h3>
+<pre class="brush:text">
+0 0 
+1 0 
+0Place B on C
+1Place A on B
+0 0 
+1 0 
+all[clear B, holding A, clear C, holding B]
+*** GOALS ***[B on C, A on B]
+preIns :[]
+**B on C
+[B on C]
+Place B on C[]
+Place B on C -> -1
+newOp:Place B on C
+newBind:{?y0=C, ?x0=B}
+*** GOALS ***[clear C, holding B]
+preIns :[Place B on C]
+**clear C
+[B on C, clear C]
+clear C <=> clear C
+{?y0=C, ?x0=B}
+*** GOALS ***[holding B, clear C]
+preIns :[Place B on C]
+**holding B
+[B on C, holding B]
+pick up B from the table[Place B on C]
+pick up B from the table -> 0
+remove B from on top ?y5[Place B on C]
+remove B from on top ?y5 -> 1
+newOp:remove B from on top ?y5
+newBind:{?x0=B, ?x5=B, ?y0=C}
+*** GOALS ***[B on ?y5, clear B, handEmpty]
+preIns :[Place B on C, remove B from on top ?y5]
+**B on ?y5
+[B on C, holding B, B on ?y5]
+B on ?y5 <=> B on A
+{?x0=B, ?y0=C, ?x5=B, ?y5=A}
+*** GOALS ***[clear B, handEmpty, B on A]
+preIns :[Place B on C, remove B from on top ?y5]
+**clear B
+[B on C, holding B, clear B]
+remove ?x9 from on top B[Place B on C, remove B from on top ?y5]
+remove ?x9 from on top B -> 2
+Place B on ?y8[Place B on C, remove B from on top ?y5]
+Place B on ?y8 -> -1
+put B down on the table[Place B on C, remove B from on top ?y5]
+put B down on the table -> 0
+newOp:remove ?x9 from on top B
+newBind:{?y0=C, ?y9=B, ?x0=B, ?x5=B, ?y5=A}
+*** GOALS ***[?x9 on B, clear ?x9, handEmpty]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B]
+**?x9 on B
+[B on C, holding B, clear B, ?x9 on B]
+?x9 on B <=> C on B
+{?y0=C, ?y9=B, ?x9=C, ?x0=B, ?x5=B, ?y5=A}
+*** GOALS ***[clear C, handEmpty, C on B]
+成功
+remove C from on top B
+{?y0=C, ?y9=B, ?x9=C, ?x0=B, ?x5=B, ?y5=A}{?x0=B, ?y0=C, ?x5=B, ?y5=A}
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C}
+*** GOALS ***[handEmpty, B on A, clear B]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B]
+**handEmpty
+[handEmpty]
+put ?x15 down on the table[Place B on C, remove B from on top ?y5, remove ?x9 from on top B]
+put ?x15 down on the table -> 1
+Place ?x12 on ?y12[Place B on C, remove B from on top ?y5, remove ?x9 from on top B]
+Place ?x12 on ?y12 -> 0
+newOp:put ?x15 down on the table
+newBind:{?y0=C, ?y9=B, ?x9=C, ?x0=B, ?x5=B, ?y5=A}
+*** GOALS ***[holding ?x15]
+holding ?x15[handEmpty, holding ?x15]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table]
+**holding ?x15
+[handEmpty, holding ?x15]
+holding ?x15 <=> holding C
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C, ?x15=C}
+put C down on the table
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C, ?x15=C}{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C}
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x9=C, ?x0=B, ?x15=C}
+remove B from on top A
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x9=C, ?x0=B, ?x15=C}{?y0=C, ?x0=B}
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C, ?x15=C}
+Place B on C
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x0=B, ?x9=C, ?x15=C}{}
+{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x9=C, ?x0=B, ?x15=C}
+*** GOALS ***[A on B, B on C]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table]
+**A on B
+[A on B]
+Place A on B[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table]
+Place A on B -> -2
+newOp:Place A on B
+newBind:{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x16=A, ?x0=B, ?x9=C, ?x15=C}
+*** GOALS ***[clear B, holding A]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table, Place A on B]
+**clear B
+[A on B, clear B]
+clear B <=> clear B
+{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x16=A, ?x0=B, ?x9=C, ?x15=C}
+*** GOALS ***[holding A, clear B]
+preIns :[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table, Place A on B]
+**holding A
+[A on B, holding A]
+pick up A from the table[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table, Place A on B]
+pick up A from the table -> 2
+remove A from on top ?y21[Place B on C, remove B from on top ?y5, remove ?x9 from on top B, put ?x15 down on the table, Place A on B]
+remove A from on top ?y21 -> 2
+newOp:pick up A from the table
+newBind:{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?x22=A, ?y0=C, ?x16=A, ?x9=C, ?x0=B, ?x15=C}
+*** GOALS ***[ontable A, clear A, handEmpty]
+成功
+pick up A from the table
+{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?x22=A, ?y0=C, ?x16=A, ?x9=C, ?x0=B, ?x15=C}{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x16=A, ?x0=B, ?x9=C, ?x15=C}
+{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x22=A, ?x16=A, ?x0=B, ?x9=C, ?x15=C}
+Place A on B
+{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x22=A, ?x16=A, ?x0=B, ?x9=C, ?x15=C}{?y9=B, ?x5=B, ?y5=A, ?y0=C, ?x9=C, ?x0=B, ?x15=C}
+{?y16=B, ?y9=B, ?x5=B, ?y5=A, ?x22=A, ?y0=C, ?x16=A, ?x9=C, ?x0=B, ?x15=C}
+SUCCESS !!
+***** This is a plan! *****
+remove C from on top B
+put C down on the table
+remove B from on top A
+Place B on C
+pick up A from the table
+Place A on B
+
+</pre>
+
+この実行結果は <br>
+A<br>
+B<br>
+C<br>
+-----<br>
+となっているブロックを<br>
+C<br>
+B<br>
+A<br>
+-----<br>
+にするというプランニングだ。
+
+実行結果の冒頭部分は、ゴールリストをプランニングしやすいようにソートしている部分の実行結果である。<br>
+00<br>
+10<br>
+は貢献度行列であり、<br>
+2つめの<br>
+00<br>
+10<br>
+はゴールリストをソートして書き換えられた貢献度行列である。
+
+サブゴールを設定しつつ、再帰的にプランニングをしているのが実行結果からわかる。
+ここで競合が起こっている部分を詳しく見ると、
+
+<pre class="brush:text">
+*** GOALS ***[holding B, clear C]
+preIns :[Place B on C]
+**holding B
+[B on C, holding B]
+pick up B from the table[Place B on C]
+pick up B from the table -> 0
+remove B from on top ?y5[Place B on C]
+remove B from on top ?y5 -> 1
+newOp:remove B from on top ?y5
+newBind:{?x0=B, ?x5=B, ?y0=C}
+</pre>
+
+ここでは[Place B on C]というサブゴールにおいて、pick up B from the table　と　remove B from on top　の競合が起こっている。
+動的に優先度を計算すると、前者が０で後者が１となり、オペレータは後者が選択されている。この際に、新しい変数束縛情報も同時に保存しているのがわかる。
+
+<h2>考察</h2>
+今回は優先度を用いた競合解消戦略を使ったPlannerプログラムを組んだが、教科書ではLEX戦略やMEA戦略を用いた競合解消戦略が紹介されていた。この戦略は、
+ワーキングメモリに追加されるタイミングで新旧を判定し、そのタイムタグを利用して、オペレータの競合解消をするものであった。この競合解消方法も有効であるが、
+オペレータは新旧で判定できたとしても、新しいオペレータが優先度が高い訳でもなく、古いオペレータが優先度が低い訳でもないので、オペレータに関して、競合解消戦略としては向いてないように思えた。しかし、一度利用したインスタンシエーションからオペレータをたどることができれば、インスタンシエーションの新旧のタイムタグから優先度を設定して新たな尺度を定義することができれば、なおよかったかもしれない。
+
+<h2>感想</h2>
+今回ソースが1000行を超えて、GUI担当の子とのクラスやメソッドの引き渡すときにとても苦労した。メソッドだけでも20ほどあり、変数だけでもかなりの数があるため、
+自分でもソースを書いていてどこの変数だったか分からなくなることが多々あった。しかし、eclipseの機能で、インスタンスするときも、自動で候補をあげてくれたりして、地味に便利な機能が多く開発するにはいい環境だと改めて思った。
+
+
