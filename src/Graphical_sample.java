@@ -7,11 +7,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-public class Graphical_sample extends JFrame
+public class Graphical_sample extends JPanel
 {
-	public static void main(String args[]){
-		Graphical_sample frame = new Graphical_sample("タイトル");
-		frame.setVisible(true);
+	private static float scale;
+	
+	public static void main(String args[])
+	{
+		Graphical_sample aaa = new Graphical_sample(0.5f);
+	    JFrame jframe = new JFrame("DrawRect");
+        Container c = jframe.getContentPane();
+        c.add(aaa, BorderLayout.CENTER);
+        jframe.setSize((int)(800*scale), (int)(608*scale));
+        jframe.setVisible(true);
 	}
 
 	HashMap<String,JLabel> blocks = new HashMap<String,JLabel>();
@@ -30,61 +37,76 @@ public class Graphical_sample extends JFrame
 		public int y;
 		public State state;
 		public JLabel label;
-		public Position(int X, int Y)
+		public Position(int X, int Y,JPanel p)
 		{
 			x = X;
 			y = Y;
 			state = State.DISABLE;
 			label = GenerateLabel("empty.png",x, y, 128, 128);
+			p.add(label);
 //			new Timer(30,(ActionListener) label).start(); 
 			//イベントリスナー定義してタイマーオブジェクトをいじる
 		}
 	}
+	
 
-	Graphical_sample(String title){
-		setTitle(title);
+	Graphical_sample(float scale){
+		this.scale = scale;
+		this.setLayout(null);
+//		setTitle(title);
 		setBounds(0, 0, 800, 608);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JPanel p = new JPanel();
-		p.setLayout(null);
+//		JPanel p = new JPanel();
+//		p.setLayout(null);
 
-		positions.put(PosName.left_bottom,new Position(64, 352));
-		positions.put(PosName.left_middle,new Position(64, 224));
-		positions.put(PosName.left_top,new Position(64, 96));
-		positions.put(PosName.center_bottom,new Position(256, 352));
-		positions.put(PosName.center_middle,new Position(256, 224));
-		positions.put(PosName.right_bottom,new Position(448, 352));
-		positions.put(PosName.arm,new Position(448, 64));
+		positions.put(PosName.left_bottom,new Position(64, 352,this));
+		positions.put(PosName.left_middle,new Position(64, 224,this));
+		positions.put(PosName.left_top,new Position(64, 96,this));
+		positions.put(PosName.center_bottom,new Position(256, 352,this));
+		positions.put(PosName.center_middle,new Position(256, 224,this));
+		positions.put(PosName.right_bottom,new Position(448, 352,this));
+		positions.put(PosName.arm,new Position(448, 64,this));
 
 		//ブロック
-		SetBlock(GenerateLabel("block_a.png",650, 64, 128, 128),p);
-		SetBlock(GenerateLabel("block_b.png",650, 256, 128, 128),p);
-		SetBlock(GenerateLabel("block_c.png",650, 448, 128, 128),p);
+		SetBlock(GenerateLabel("block_a.png",650, 64, 128, 128),this);
+		SetBlock(GenerateLabel("block_b.png",650, 256, 128, 128),this);
+		SetBlock(GenerateLabel("block_c.png",650, 448, 128, 128),this);
 
 		//固定パーツ
 		JLabel arm = GenerateLabel("arm.png",438, 0, 148, 128);
-		p.add(arm);
+		this.add(arm);
 		JLabel floor = GenerateLabel("floor.png",0, 480, 640, 128);
-		p.add(floor);
+		this.add(floor);
 
 		//点線ラベルをパネルに追加
 		for (PosName n : PosName.values()) {
-			p.add(positions.get(n).label);
+			this.add(positions.get(n).label);
 		}
 
 		//非表示
 		//empty_floor3.setVisible(false);
 
-		Container contentPane = getContentPane();
-		contentPane.add(p, BorderLayout.CENTER);
+		//Container contentPane = getContentPane();
+		//contentPane.add(p, BorderLayout.CENTER);
 	}
 
 	private JLabel GenerateLabel(String imgName, int x, int y, int witdh, int height)
 	{
 		ImageIcon icon = new ImageIcon("./img/"+imgName);
-		JLabel label = new JLabel(icon);
-		label.setBounds(x, y, witdh, height);
+
+		MediaTracker tracker = new MediaTracker(this);
+	    // ポイント２．getScaledInstanceで大きさを変更します。
+	    Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * scale), -1,
+	        Image.SCALE_SMOOTH);
+	 
+	    // ポイント３．MediaTrackerで処理の終了を待ちます。
+	    tracker.addImage(smallImg, 1);
+	 
+	    ImageIcon smallIcon = new ImageIcon(smallImg);	    
+		
+		JLabel label = new JLabel(smallIcon);
+		label.setBounds((int)(x*scale), (int)(y*scale), (int)(witdh*scale), (int)(height*scale));
 		return label;
 	}
 
@@ -162,9 +184,9 @@ public class Graphical_sample extends JFrame
 		private boolean IsFit(int x,int y,int fit_x,int fit_y)
 		{
 			//80 = 64(半径) + 12(遊び)
-			if(Validator.includes(fit_x-80, fit_x+80, x)
-					&& Validator.includes(fit_y-80, fit_y+80, y)){
-				blocks.get(key).setLocation(fit_x, fit_y);
+			if(Validator.includes(fit_x-80, fit_x+80, (int)(x/scale))
+					&& Validator.includes(fit_y-80, fit_y+80, (int)(y/scale))){
+				blocks.get(key).setLocation((int)(fit_x*scale), (int)(fit_y*scale));
 				return true;
 			}
 			return false;

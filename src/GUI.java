@@ -40,58 +40,54 @@ public class GUI extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public GUI() {
+	public GUI() 
+	{
 		setTitle("Planner");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 1200, 800);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		JLabel lblStart = new JLabel("Start");
-		lblStart.setBounds(36, 12, 61, 15);
+		lblStart.setBounds(10, 12, 61, 15);
 		contentPane.add(lblStart);
 		
+		float graphical_scale = 0.5f;
+		Graphical_sample start_arrange = new Graphical_sample(graphical_scale);
+		start_arrange.setBounds(10, 40, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		contentPane.add(start_arrange);
+
 		JLabel lblFinish = new JLabel("Finish");
-		lblFinish.setBounds(36, 123, 61, 15);
+		lblFinish.setBounds(10, 420, 61, 15);
 		contentPane.add(lblFinish);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(25, 39, 165, 72);
-		contentPane.add(scrollPane);
-		
-		JTree tree = new JTree();
-		scrollPane.setViewportView(tree);
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(25, 150, 165, 72);
-		contentPane.add(scrollPane_1);
-		
-		JTree tree_1 = new JTree();
-		scrollPane_1.setViewportView(tree_1);
+
+		Graphical_sample goal_arrange = new Graphical_sample(graphical_scale);
+		goal_arrange.setBounds(10, 440, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		contentPane.add(goal_arrange);
 		
 		JScrollPane scrollPane_2 = new JScrollPane();
-		scrollPane_2.setBounds(243, 40, 170, 179);
+		scrollPane_2.setBounds(820, 40, 170, 179);
 		contentPane.add(scrollPane_2);
 		
 		JTree tree_2 = new JTree();
 		scrollPane_2.setViewportView(tree_2);
 		
 		JLabel lblProcess = new JLabel("Process");
-		lblProcess.setBounds(253, 12, 61, 15);
+		lblProcess.setBounds(820, 12, 61, 15);
 		contentPane.add(lblProcess);
 		
 		JButton btnRun = new JButton("Run");
-		btnRun.setBounds(64, 234, 80, 25);
+		btnRun.setBounds(64, 380, 80, 25);
 		contentPane.add(btnRun);
 		
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(244, 234, 80, 25);
+		btnBack.setBounds(900, 234, 80, 25);
 		contentPane.add(btnBack);
 		
 		JButton btnGo = new JButton("Go");
-		btnGo.setBounds(333, 234, 80, 25);
+		btnGo.setBounds(960, 234, 80, 25);
 		contentPane.add(btnGo);
 		
 	}
