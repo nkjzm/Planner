@@ -1,65 +1,104 @@
-import java.applet.Applet;
-import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JEditorPane;
+import javax.swing.JScrollBar;
+import javax.swing.JSeparator;
+import java.awt.Panel;
+import java.awt.Canvas;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Random;
+import java.awt.event.ActionEvent;
 
-public class GUI extends java.applet.Applet implements ActionListener{
-	
 
-	int screen_width = 320, screen_height = 240;
-	int speed = 5;
-	
-	Dimension d;//表示領域
-	Image offs;//オフスクリーン
-	Graphics grf;
-	int size = 20; //ブロックの大きさ
-	
-	ArrayList<String> initialCondition;
-	ArrayList<String> goalCondition;
-	ArrayList<String> plan;
-	
-	Button rb;
-	Button bb;
-	Button gb;
-	
-	public void init(){
-		this.setSize(screen_width, screen_height);
+public class GUI extends JFrame {
 
-		initialCondition = new ArrayList<String>();
-		goalCondition = new ArrayList<String>();
-		/*オフスクリーンの設定*/
-		d = getSize(); //表示領域の取得
-		offs = createImage(d.width, d.height);
-		grf = offs.getGraphics();
-		grf.setColor(Color.white);
-		//各フィールドの初期化
-		rb = new Button("Run");
-		bb = new Button("Back");
-		gb = new Button("Go");
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GUI frame = new GUI();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public GUI() {
+		setTitle("Planner");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
 		
-		rb.addActionListener(this);
-		bb.addActionListener(this);
-		gb.addActionListener(this);
-		setLayout(null);
+		JLabel lblStart = new JLabel("Start");
+		lblStart.setBounds(36, 12, 61, 15);
+		contentPane.add(lblStart);
 		
-		rb.setBounds(450, 300, 180, 100);
-		bb.setBounds(450, 410, 90, 50);
-		gb.setBounds(540, 410, 90, 50);
+		JLabel lblFinish = new JLabel("Finish");
+		lblFinish.setBounds(36, 123, 61, 15);
+		contentPane.add(lblFinish);
 		
-		add(rb);
-		add(bb);
-		add(gb);
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(25, 39, 165, 72);
+		contentPane.add(scrollPane);
+		
+		JTree tree = new JTree();
+		scrollPane.setViewportView(tree);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(25, 150, 165, 72);
+		contentPane.add(scrollPane_1);
+		
+		JTree tree_1 = new JTree();
+		scrollPane_1.setViewportView(tree_1);
+		
+		JScrollPane scrollPane_2 = new JScrollPane();
+		scrollPane_2.setBounds(243, 40, 170, 179);
+		contentPane.add(scrollPane_2);
+		
+		JTree tree_2 = new JTree();
+		scrollPane_2.setViewportView(tree_2);
+		
+		JLabel lblProcess = new JLabel("Process");
+		lblProcess.setBounds(253, 12, 61, 15);
+		contentPane.add(lblProcess);
+		
+		JButton btnRun = new JButton("Run");
+		btnRun.setBounds(64, 234, 80, 25);
+		contentPane.add(btnRun);
+		
+		JButton btnBack = new JButton("Back");
+		btnBack.setBounds(244, 234, 80, 25);
+		contentPane.add(btnBack);
+		
+		JButton btnGo = new JButton("Go");
+		btnGo.setBounds(333, 234, 80, 25);
+		contentPane.add(btnGo);
 		
 	}
 	public void actionPerformed(ActionEvent e){
-		String cmd = e.getActionCommand();
-		if(cmd.equals("Run")){}
-		if(cmd.equals("Back")){}
-		if(cmd.equals("Go")){}
-		
+	    String cmd = e.getActionCommand();
+	    if(cmd.equals("Run")){
+	    	Planner planner = new Planner();
+	    }
 	}
-	
 }
