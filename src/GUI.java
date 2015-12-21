@@ -10,6 +10,8 @@ import javax.swing.JScrollBar;
 import javax.swing.JSeparator;
 import java.awt.Panel;
 import java.awt.Canvas;
+import java.awt.Color;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.JButton;
@@ -20,7 +22,8 @@ import java.awt.event.ActionEvent;
 public class GUI extends JFrame {
 
 	private JPanel contentPane;
-
+	Graphical_sample start_arrange;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -48,6 +51,7 @@ public class GUI extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+		contentPane.setBackground(Color.gray);
 		contentPane.setLayout(null);
 		
 		JLabel lblStart = new JLabel("Start");
@@ -55,7 +59,7 @@ public class GUI extends JFrame {
 		contentPane.add(lblStart);
 		
 		float graphical_scale = 0.5f;
-		Graphical_sample start_arrange = new Graphical_sample(graphical_scale);
+		start_arrange = new Graphical_sample(graphical_scale);
 		start_arrange.setBounds(10, 40, (int)(800*graphical_scale), (int)(608*graphical_scale));
 		contentPane.add(start_arrange);
 
@@ -94,6 +98,10 @@ public class GUI extends JFrame {
 	public void actionPerformed(ActionEvent e){
 	    String cmd = e.getActionCommand();
 	    if(cmd.equals("Run")){
+    		System.out.println("aaa");
+	    	for(String s :start_arrange.getCurrentState()){
+	    		System.out.println(s);
+	    	}
 	    	Planner planner = new Planner();
 	    }
 	}
