@@ -87,6 +87,7 @@ public class GUI extends JFrame {
 				});
 		contentPane.add(btnRun);
 		JButton btnBack = new JButton("Back");
+		btnBack.setBounds(900, 234, 80, 25);
 		btnBack.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -118,6 +119,7 @@ public class GUI extends JFrame {
 						 area.append(aPlanner.ProgressResult.get(i)+ "\n");
 						}
 						}});
+		contentPane.add(btnGo);
 
 
 }
