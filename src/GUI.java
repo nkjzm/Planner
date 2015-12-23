@@ -73,6 +73,7 @@ public class GUI extends JFrame {
 		JButton btnRun = new JButton("Run");
 		btnRun.setBounds(64, 380, 80, 25);
 		btnRun.addActionListener(
+				
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
 						area.setText("");

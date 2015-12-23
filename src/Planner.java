@@ -9,6 +9,7 @@ public class Planner {
  private ArrayList<String> allGoals ;
  static Random rand;
  private ArrayList<Operator> plan;
+ private ArrayList<String> ProgressResult;
 
  private int count;
  private int max = 100; 
@@ -233,6 +234,7 @@ public class Planner {
  public void start(ArrayList<String> goalList,ArrayList<String> initialState){
   HashMap<String,String> theBinding = new HashMap<String,String>();
   plan = new ArrayList<Operator>();
+  ProgressResult = new ArrayList<String>();
   
   if(planning(goalList,initialState,theBinding)){
 
@@ -240,8 +242,11 @@ public class Planner {
 	  System.out.println("***** This is a plan! *****");
 	  for(int i = 0 ; i < plan.size() ; i++){
 		  Operator op = (Operator)plan.get(i);	    
-		  System.out.println((op.instantiate(theBinding)).name);
+		  ProgressResult.add((op.instantiate(theBinding)).name);
 	  }
+	  	for(int i = 0; i<ProgressResult.size(); i++){
+	  		System.out.println(ProgressResult.get(i));
+	  	}
   }else{
 	  System.out.println("FALSE !!");
   }
@@ -679,6 +684,13 @@ public class Planner {
 	 }
 	 return result;
  }
+ 
+
+ 
+ 
+ 
+ 
+ 
  
 
 
