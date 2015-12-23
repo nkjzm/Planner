@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 public class GUI extends JFrame {
 	private JPanel contentPane;
 	Graphical_sample start_arrange;
+	int i = -1;
 	/**
 	 * Launch the application.
 	 */
