@@ -87,13 +87,37 @@ public class GUI extends JFrame {
 				});
 		contentPane.add(btnRun);
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(900, 234, 80, 25);
+		btnBack.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						Planner aPlanner = new Planner();
+						 aPlanner.initOperators();
+						 aPlanner.staticPrioritySet();
+						 ArrayList<String> goalList     = aPlanner.initGoalList();
+						 ArrayList<String> initialState = aPlanner.initInitialState();
+						 aPlanner.sortGoals(goalList);
+						 aPlanner.start(goalList,initialState);
+						if(i>0){i--;
+						 area.append(aPlanner.ProgressResult.get(i)+ "\n");
+						}else{area.append("");}}});
+
 		contentPane.add(btnBack);
 		JButton btnGo = new JButton("Go");
-		btnGo.setBounds(960, 234, 80, 25);
-		contentPane.add(btnGo);
+		btnGo.setBounds(990, 234, 80, 25);
+		btnGo.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						Planner aPlanner = new Planner();
+						 aPlanner.initOperators();
+						 aPlanner.staticPrioritySet();
+						 ArrayList<String> goalList     = aPlanner.initGoalList();
+						 ArrayList<String> initialState = aPlanner.initInitialState();
+						 aPlanner.sortGoals(goalList);
+						 aPlanner.start(goalList,initialState);
+						if((i>=-1)&(aPlanner.ProgressResult.size()-1>i)){i++;
+						 area.append(aPlanner.ProgressResult.get(i)+ "\n");
+						}
+						}});
 
-
-	}
 
 }
