@@ -41,7 +41,7 @@ public class Graphical_sample extends JPanel {
 	public class Position {
 		public int x;
 		public int y;
-		private State state;
+		public State state;
 		public JLabel label;
 		// stateがFillの時のみ利用。それ以外の場合は不定とする。
 		public String blockId;
@@ -187,6 +187,7 @@ public class Graphical_sample extends JPanel {
 			Matcher m = p.matcher(st);
 			if (m.find()) {
 				state.remove(st);
+				break;
 			}
 		}
 
@@ -440,6 +441,9 @@ public class Graphical_sample extends JPanel {
 				blocks.get(key).setLocation(init_x, init_y);
 			}
 			Position pos = positions.get(posName);
+			if(pos == null){
+				return;
+			}
 			pos.state = State.FILL;
 			pos.blockId = key;
 			UpdateDisplay();

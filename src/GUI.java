@@ -18,15 +18,18 @@ import javax.swing.JTextArea;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
+
 public class GUI extends JFrame {
 	private JPanel contentPane;
-	Graphical_sample start_arrange;
-	Graphical_sample goal_arrange;
-	int i = -1;
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
+	Graphical_sample startArrange;
+	Graphical_sample progressArrange;
+	Graphical_sample goalArrange;
+	int index = 0;
+	ArrayList<ArrayList<String>> progressStates;
+	final JTextArea area;
+
+	public static void main(String[] args) 
+	{
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -38,9 +41,7 @@ public class GUI extends JFrame {
 			}
 		});
 	}
-	/**
-	 * Create the frame.
-	 */
+
 	public GUI()
 	{
 		setTitle("Planner");
@@ -59,27 +60,36 @@ public class GUI extends JFrame {
 
 		float graphical_scale = 0.5f;
 
-		start_arrange = new Graphical_sample(graphical_scale);
-		start_arrange.setBounds(10, 40, (int)(800*graphical_scale), (int)(608*graphical_scale));
-		contentPane.add(start_arrange);
+		startArrange = new Graphical_sample(graphical_scale);
+		startArrange.setBounds(10, 40, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		contentPane.add(startArrange);
 
 		JLabel lblFinish = new JLabel("Finish");
 		lblFinish.setBounds(10, 420, 61, 15);
 		contentPane.add(lblFinish);
 
-		goal_arrange = new Graphical_sample(graphical_scale);
-		goal_arrange.setBounds(10, 440, (int)(800*graphical_scale), (int)(608*graphical_scale));
-		contentPane.add(goal_arrange);
+		goalArrange = new Graphical_sample(graphical_scale);
+		goalArrange.setBounds(10, 440, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		contentPane.add(goalArrange);
+
+		progressArrange = new Graphical_sample(graphical_scale);
+		progressArrange.setBounds(600, 400, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		contentPane.add(progressArrange);
 
 		JScrollPane scrollPane_2 = new JScrollPane();
-		scrollPane_2.setBounds(820, 40, 170, 179);
+		scrollPane_2.setBounds(600, 40, 170, 179);
 		contentPane.add(scrollPane_2);
 
-		final JTextArea area = new JTextArea();
+		area = new JTextArea();
 		scrollPane_2.setViewportView(area);
+
 		JLabel lblProcess = new JLabel("Process");
-		lblProcess.setBounds(820, 12, 61, 15);
+		lblProcess.setBounds(600, 12, 61, 15);
 		contentPane.add(lblProcess);
+
+		final JLabel lblCount = new JLabel("実行前");
+		lblCount.setBounds(700, 12, 61, 15);
+		contentPane.add(lblCount);
 
 		JButton btnRun = new JButton("Run");
 		btnRun.setBounds(64, 380, 80, 25);
@@ -87,58 +97,52 @@ public class GUI extends JFrame {
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
 						area.setText("");
-						for(String s :start_arrange.getCurrentState()){
-							area.append(s+"\n");
-						}
+						index = 0;
 						Planner planner = new Planner();
-//						ArrayList<String> initialState = start_arrange.getCurrentState();
-						ArrayList<String> goalList     = planner.initGoalList();
-						ArrayList<String> initialState = planner.initInitialState();
+						ArrayList<String> initialState = startArrange.getCurrentState();
+						ArrayList<String> goalList = goalArrange.getCurrentState();
 						planner.sortGoals(goalList);
 						planner.start(goalList,initialState);
+						progressStates = planner.ProgressStates;
+						lblCount.setText("計" + (progressStates.size()-1) + "回\n");
+						DisplayState();
 					}
 				});
-
 		contentPane.add(btnRun);
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(900, 234, 80, 25);
+		btnBack.setBounds(600, 234, 80, 25);
 		btnBack.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						Planner aPlanner = new Planner();
-						aPlanner.initOperators();
-						aPlanner.staticPrioritySet();
-						ArrayList<String> goalList     = aPlanner.initGoalList();
-						ArrayList<String> initialState = aPlanner.initInitialState();
-						aPlanner.sortGoals(goalList);
-						aPlanner.start(goalList,initialState);
-						if(i>0){
-							i--;
-							area.append(aPlanner.ProgressResult.get(i)+ "\n");
-						}else{
-							area.append("");
-						}
+						index = Math.max(--index,0);
+						DisplayState();
 					}
 				});
 		contentPane.add(btnBack);
 		JButton btnGo = new JButton("Go");
-		btnGo.setBounds(990, 234, 80, 25);
+		btnGo.setBounds(700, 234, 80, 25);
 		btnGo.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						Planner aPlanner = new Planner();
-						aPlanner.initOperators();
-						aPlanner.staticPrioritySet();
-						ArrayList<String> goalList     = aPlanner.initGoalList();
-						ArrayList<String> initialState = aPlanner.initInitialState();
-						aPlanner.sortGoals(goalList);
-						aPlanner.start(goalList,initialState);
-						if((i>=-1)&(aPlanner.ProgressResult.size()-1>i)){
-							i++;
-							area.append(aPlanner.ProgressResult.get(i)+ "\n");
-						}
+						index = Math.min(++index,progressStates.size()-1);
+						DisplayState();
 					}
 				});
 		contentPane.add(btnGo);
+	}
+	private void DisplayState() {
+		if(index == 0){
+			area.setText("初期状態\n");
+		}else if(index == progressStates.size() - 1){
+			area.setText("終了状態\n");
+		}else{
+			area.setText("移動"+index+"回目\n");			
+		}
+		area.append(" --- \n");	
+		ArrayList<String> states = progressStates.get(index);
+		for(String str : states){
+			area.append(str + "\n");
+		}
+		progressArrange.SetBlockArrangement(new ArrayList<String>(states));
 	}
 }

@@ -13,9 +13,9 @@ public class Planner {
 	public ArrayList<String> allGoals ;
 	static Random rand;
 	public ArrayList<Operator> plan;
-	public ArrayList<String> ProgressResult;
 	public ArrayList<ArrayList<String>> ProgressStates;
-
+	public ArrayList<String> ProgressResult;
+	
 	public int count;
 	public int max = 100;
 
@@ -23,7 +23,6 @@ public class Planner {
 		Planner aPlanner = new Planner();
 		ArrayList<String> goalList     = aPlanner.initGoalList();
 		ArrayList<String> initialState = aPlanner.initInitialState();
-		aPlanner.sortGoals(goalList);
 		System.out.println("all"+aPlanner.allGoals);
 		aPlanner.start(goalList,initialState);
 	}
@@ -239,28 +238,43 @@ public class Planner {
 	public void start(ArrayList<String> goalList,ArrayList<String> initialState){
 		HashMap<String,String> theBinding = new HashMap<String,String>();
 		plan = new ArrayList<Operator>();
-		ProgressResult = new ArrayList<String>();
+		
 		//TODO: for宮部 これに途中の状態を保存
 		// オペレーターではなく、状態
 		ProgressStates = new ArrayList<ArrayList<String>>();
-
-		if(planning(goalList,initialState,theBinding)){
+		ProgressResult = new ArrayList<String>();
+		
+		// goalList,initialStateはソート中に書き換えられるので、バックアップとっておく
+		
+		ArrayList<String> goalList_2 = new ArrayList<String>(goalList);
+		ArrayList<String> initialState_2 = new ArrayList<String>(initialState);		
+		
+		sortGoals(goalList);
+		
+		if(planning(goalList,initialState,theBinding))
+		{
 			System.out.println("SUCCESS !!");
 			System.out.println("***** This is a plan! *****");
-			for(int i = 0 ; i < plan.size() ; i++){
-				Operator op = (Operator)plan.get(i);
-				ProgressResult.add((op.instantiate(theBinding)).name);
-			}
+			
+			int plan_i = 0;
+					ProgressResult(plan,theBinding,initialState_2,plan_i,goalList_2);
+			
+					//最初と最後に初期状態とゴール状態を追加
+					ProgressStates.add(0,initialState_2);
+					ProgressStates.add(plan.size(), goalList_2);
+					//よくわからんけど最後に空のリスト追加されてたので消しました。
+					ProgressStates.remove(plan.size()+1); 
+					
 			System.out.println("---- Start");					
-			for(int j = 0; j<initialState.size(); ++j){
-				System.out.println(initialState.get(j));
+			for(int j = 0; j<initialState_2.size(); ++j){
+				System.out.println(initialState_2.get(j));
 			}
 			System.out.println("---- Goal");					
-			for(int j = 0; j<goalList.size(); ++j){
-				System.out.println(goalList.get(j));
+			for(int j = 0; j<goalList_2.size(); ++j){
+				System.out.println(goalList_2.get(j));
 			}
-			for(int i = 0; i<ProgressStates.size(); ++i){
-				System.out.println("---- Step"+i);					
+			for(int i = 0; i< ProgressStates.size(); ++i){
+				System.out.println("---- Step" + i);
 				for(int j = 0; j<ProgressStates.get(i).size(); ++j){
 					System.out.println(ProgressStates.get(i).get(j));
 				}
@@ -369,7 +383,8 @@ public class Planner {
 							st = instantiateString(st,theBinding);
 							theGoalList.add(st);
 						}
-
+						
+						
 						//再帰的にプランニングを続行
 						if(planning(theGoalList,theCurrentState,theBinding)){
 							preGoals.clear();
@@ -746,58 +761,25 @@ public class Planner {
 
 	public ArrayList<String> initGoalList(){
 		ArrayList<String> goalList = new ArrayList<String>();
-		goalList.add("A on B");
 		goalList.add("B on C");
-		// goalList.add("C on D");
-		/*goalList.add("D on E");
-  goalList.add("E on F");
-  goalList.add("clear A");
-  goalList.add("A on C");
-  goalList.add("B on D");
-  goalList.add("C on F");
-  goalList.add("clear A");
-  goalList.add("F on E"); */
+		goalList.add("A on B");
+	//	goalList.add("C on D");
+	//	goalList.add("D on E");
+  	//	goalList.add("E on F");
+  		goalList.add("clear A");
+	//	goalList.add("clear B");
+	//	goalList.add("clear C");
+	//	goalList.add("clear D");
+	//	goalList.add("clear F");
+	//	goalList.add("ontable A");
+	//	goalList.add("ontable B");
+  		goalList.add("ontable C");
+  	//	goalList.add("ontable D");
+  	//	goalList.add("ontable F");
+  		goalList.add("handEmpty");
 		return goalList;
 	}
-
-	public ArrayList<String> initInitialState(){
-		ArrayList<String> initialState = new ArrayList<String>();
-		//initialState.add("F on E");
-		//initialState.add("E on D");
-		// initialState.add("D on C");
-		initialState.add("C on B");
-		initialState.add("B on A");
-		initialState.add("ontable A");
-		//initialState.add("clear A");
-		// initialState.add("ontable B");
-		// initialState.add("clear B");
-		//initialState.add("ontable C");
-		initialState.add("clear C");
-		//initialState.add("ontable D");
-		//initialState.add("clear D");
-		//initialState.add("ontable E");
-		//initialState.add("clear E");
-		//initialState.add("ontable F");
-		//initialState.add("clear F");
-
-		initialState.add("handEmpty");
-
-		return initialState;
-	}
-
-	/*
-	 * ファイルからオペレータを読み込むメソッド
-	 * ファイルの書き方の例は
-	 *
-	 * NAME	RULE
-	 * IF		pattern1
-	 * 		patten2
-	 * ADD	addition
-	 * DELETE	remove
-	 *
-	 * @param	ファイル名
-	 * @ret	読み込み成功時は0,Exception時は-1,読み込み途中で失敗した場合は途中までの行数
-	 */
+	
 	public void initOperators(){
 		operators = new ArrayList<Operator>();
 
@@ -880,7 +862,59 @@ public class Planner {
 				new Operator(name4,ifList4,addList4,deleteList4);
 		operators.add(operator4);
 	}
+
+
+public ArrayList<String> initInitialState(){
+	ArrayList<String> initialState = new ArrayList<String>();
+	//initialState.add("F on E");
+	//initialState.add("E on D");
+	//initialState.add("D on C");
+	initialState.add("C on B");
+	initialState.add("B on A");
+	initialState.add("ontable A");
+	//initialState.add("clear A");
+	//initialState.add("ontable B");
+	//initialState.add("clear B");
+	//initialState.add("ontable C");
+	initialState.add("clear C");
+	//initialState.add("ontable D");
+	//initialState.add("clear D");
+	//initialState.add("ontable E");
+	//initialState.add("clear E");
+	//initialState.add("ontable F");
+	//initialState.add("clear F");
+	initialState.add("handEmpty");
+
+	return initialState;
 }
+
+//再帰的に状態を出力するメソッド
+
+public ArrayList<String> ProgressResult(ArrayList<Operator> plan,
+									   HashMap<String,String> theBinding,
+									   ArrayList<String> initialState,int i,
+									   ArrayList<String> goalList){
+
+	
+	if(i==plan.size()-1){
+		ProgressStates.add((ArrayList)ProgressResult.clone());
+		return ProgressResult;
+		
+	}else{
+		Operator op = (Operator)plan.get(i);
+		
+		ArrayList<String> tmp = new ArrayList<String>();
+		tmp = (op.instantiate(theBinding)).applyState_2(initialState);
+		ProgressStates.add((ArrayList)tmp.clone());
+		ProgressResult(plan,theBinding,tmp,i+1,goalList);
+		
+		return ProgressResult;
+		}
+	}
+}
+
+
+
 
 class Operator{
 	String name;
@@ -942,6 +976,18 @@ class Operator{
 		}
 		return theState;
 	}
+	
+	public ArrayList<String> applyState_2(ArrayList<String> theState){
+		ArrayList<String> tmp = new ArrayList<String>(theState);
+		for(int i = 0 ; i < addList.size() ; i++){
+			tmp.add(addList.get(i));
+		}
+		for(int i = 0 ; i < deleteList.size() ; i++){
+			tmp.remove(deleteList.get(i));
+		}
+		return tmp;
+		}
+	
 
 
 	public Operator getRenamedOperator(int uniqueNum){
@@ -1082,7 +1128,9 @@ class Operator{
 		// 先頭が ? なら変数
 		return str1.startsWith("?");
 	}
+
 }
+
 class Unifier {
 	StringTokenizer st1;
 	String buffer1[];
@@ -1116,7 +1164,7 @@ class Unifier {
 			return false;
 		}
 	}
-
+		
 	public boolean unify(String string1,String string2){
 		// 同じなら成功
 		if(string1.equals(string2)) return true;
@@ -1203,5 +1251,6 @@ class Unifier {
 	boolean var(String str1){
 		// 先頭が ? なら変数
 		return str1.startsWith("?");
-	}
+		}
 }
+
