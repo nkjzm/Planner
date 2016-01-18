@@ -45,18 +45,16 @@ public class Graphical_sample extends JPanel {
 		public JLabel label;
 		// stateがFillの時のみ利用。それ以外の場合は不定とする。
 		public String blockId;
-
-		public Position(int X, int Y, JPanel p) {
+		public Position(int X, int Y, JPanel p) 
+		{
 			x = X;
 			y = Y;
 			state = State.EMPTY;
 			label = GenerateLabel("empty.png", x, y, 128, 128);
 			p.add(label);
-			// new Timer(30,(ActionListener) label).start();
-			// TODO: イベントリスナー定義してタイマーオブジェクトをいじる
 		}
-
-		public void SetState(State s) {
+		public void SetState(State s) 
+		{
 			state = s;
 			if (state == State.DISABLE) {
 				label.setVisible(false);
@@ -64,8 +62,8 @@ public class Graphical_sample extends JPanel {
 				label.setVisible(true);
 			}
 		}
-
-		public State GetState() {
+		public State GetState() 
+		{
 			return state;
 		}
 	}
@@ -101,9 +99,7 @@ public class Graphical_sample extends JPanel {
 	private JLabel GenerateLabel(String imgName, int x, int y, int witdh, int height) {
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
 		MediaTracker tracker = new MediaTracker(this);
-		// ポイント２．getScaledInstanceで大きさを変更します。
 		Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * scale), -1, Image.SCALE_SMOOTH);
-		// ポイント３．MediaTrackerで処理の終了を待ちます。
 		tracker.addImage(smallImg, 1);
 		ImageIcon smallIcon = new ImageIcon(smallImg);
 		JLabel label = new JLabel(smallIcon);
@@ -128,12 +124,6 @@ public class Graphical_sample extends JPanel {
 
 	public ArrayList<String> getCurrentState() {
 		ArrayList<String> initialState = new ArrayList<String>();
-
-		if (positions.get(PosName.arm).GetState() == State.FILL) {
-			initialState.add("holding " + positions.get(PosName.arm).blockId);
-		} else {
-			initialState.add("handEmpty");
-		}
 
 		if (positions.get(PosName.left_bottom).GetState() == State.FILL) {
 			initialState.add("ontable " + positions.get(PosName.left_bottom).blockId);
@@ -175,6 +165,12 @@ public class Graphical_sample extends JPanel {
 		if (positions.get(PosName.right_bottom).GetState() == State.FILL) {
 			initialState.add("ontable " + positions.get(PosName.right_bottom).blockId);
 			initialState.add("clear " + positions.get(PosName.right_bottom).blockId);
+		}
+
+		if (positions.get(PosName.arm).GetState() == State.FILL) {
+			initialState.add("holding " + positions.get(PosName.arm).blockId);
+		} else {
+			initialState.add("handEmpty");
 		}
 
 		return initialState;

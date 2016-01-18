@@ -101,7 +101,6 @@ public class GUI extends JFrame {
 						Planner planner = new Planner();
 						ArrayList<String> initialState = startArrange.getCurrentState();
 						ArrayList<String> goalList = goalArrange.getCurrentState();
-						planner.sortGoals(goalList);
 						planner.start(goalList,initialState);
 						progressStates = planner.ProgressStates;
 						lblCount.setText("計" + (progressStates.size()-1) + "回\n");
