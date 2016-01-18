@@ -26,6 +26,7 @@ public class GUI extends JFrame {
 	Graphical_sample goalArrange;
 	int index = 0;
 	ArrayList<ArrayList<String>> progressStates;
+	ArrayList<String> ProgressResult;
 	final JTextArea area;
 
 	public static void main(String[] args) 
@@ -103,6 +104,7 @@ public class GUI extends JFrame {
 						ArrayList<String> goalList = goalArrange.getCurrentState();
 						planner.start(goalList,initialState);
 						progressStates = planner.ProgressStates;
+						ProgressResult = planner.ProgressResult;
 						lblCount.setText("計" + (progressStates.size()-1) + "回\n");
 						DisplayState();
 					}
@@ -136,6 +138,9 @@ public class GUI extends JFrame {
 			area.setText("終了状態\n");
 		}else{
 			area.setText("移動"+index+"回目\n");			
+		}
+		if(ProgressResult.size()>0){
+			area.append(ProgressResult.get(index));
 		}
 		area.append(" --- \n");	
 		ArrayList<String> states = progressStates.get(index);
