@@ -2,7 +2,9 @@ package planner;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Label;
 import java.awt.MediaTracker;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.security.auth.Destroyable;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -32,16 +35,21 @@ public class Graphical_sample extends JPanel
 	public JPanel blockPanel;
 	public JPanel uiPanel;
 	public JLabel swapLabel;
+	public JLabel[] dustboxLabels;
+	public JLabel[] addLabels;
 
+	private char peekBlockId = 'a' - 1;
 
 	public static void main(String args[]) 
 	{
 		Graphical_sample aaa = new Graphical_sample(0.5f);
 		JFrame jframe = new JFrame("DrawRect");
+		jframe.setVisible(true);
 		Container c = jframe.getContentPane();
 		c.add(aaa, BorderLayout.CENTER);
-		jframe.setSize((int) (1000 * scale), (int) (800 * scale));
-		jframe.setVisible(true);
+		//ウィンドウのタイトルバーと枠を考慮
+		jframe.getContentPane().setPreferredSize(new Dimension(aaa.getSize().width,aaa.getSize().height));
+		jframe.pack();
 
 		//		ArrayList<String> tmp = new ArrayList<String>();
 		//		tmp.add("ontable A");
@@ -59,7 +67,7 @@ public class Graphical_sample extends JPanel
 		this.scale = scale;
 		instance = this;
 		this.setLayout(null);
-		setBounds(0, 0, 1000, 800);
+		setBounds(0, 0, (int) (1280 * scale), (int) (720 * scale));
 
 		this.setLayout(new OverlayLayout(this));
 
@@ -67,30 +75,47 @@ public class Graphical_sample extends JPanel
 		InitPanel(blankPanel = new JPanel());	//点線パネル描画用
 		InitPanel(blockPanel = new JPanel());	//ブロック描画用
 		InitPanel(uiPanel = new JPanel());		//UI描画用
-		
+
 		pManager = new PositionManager();
 
-		// ブロック
-		SetBlock(GenerateLabel("block_a.png", 650, 64, 128, 128), "A");
-		SetBlock(GenerateLabel("block_b.png", 650, 256, 128, 128), "B");
-		SetBlock(GenerateLabel("block_c.png", 650, 448, 128, 128), "C");
-		for(String blockId : blocks.keySet()){
-			pManager.AddSlot(blockId);
+		//ブロック
+		for(int i = 0;i<3;++i){
+			AddBlock();
 		}
 
-		// 固定パーツ
-		JLabel arm = GenerateLabel("arm.png", 438, 0, 148, 128);
+		//背景
+		JLabel bg = GenerateLabel("bg.png", 0, 470);
+		bgPanel.add(bg);
+		//アーム
+		JLabel arm = GenerateLabel("arm.png", 800, 0);
 		bgPanel.add(arm);
-		JLabel floor = GenerateLabel("floor.png", 0, 480, 640, 128);
-		bgPanel.add(floor);
+		//ゴミ箱
+		dustboxLabels = new JLabel[2];
+		for(int i=0;i<2;++i){
+			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:13, i==0?477:388);
+			bgPanel.add(dustboxLabels[i]);
+		}
+		dustboxLabels[1].setVisible(false);
+		//追加ボタン
+		addLabels = new JLabel[2];
+		for(int i=0;i<2;++i){
+			addLabels[i] = GenerateLabel("add_"+i+".png", 1121, 540);
+			bgPanel.add(addLabels[i]);
+		}
+		AddMouseListener listener = new AddMouseListener();
+		addLabels[0].addMouseListener(listener);
+		addLabels[0].addMouseMotionListener(listener);
+		addLabels[1].setVisible(false);
+		addLabels[1].setOpaque(false);
 
-		swapLabel = GenerateLabel("swap.png", 700, 700, 111, 85);
+		//UIパーツ
+		swapLabel = GenerateLabel("swap.png", 700, 700);
 		uiPanel.add(swapLabel, 0);
 		swapLabel.setVisible(false);
 
 		pManager.UpdateDisplay();
 	}
-	
+
 	private void  InitPanel(JPanel panel) 
 	{
 		panel.setOpaque(false);
@@ -98,7 +123,37 @@ public class Graphical_sample extends JPanel
 		this.add(panel,0);
 	}
 
-	public static JLabel GenerateLabel(String imgName, int x, int y, int witdh, int height) 
+	public void AddBlock() 
+	{
+		for(int i=0;i<'i'-'a';++i){
+			if(++peekBlockId>'i'){
+				peekBlockId = 'a';
+			}
+			String blockId = String.valueOf(peekBlockId);
+			Boolean isUse = false;
+			for(String key : blocks.keySet()){
+				if(key.equals(blockId)){
+					isUse = true;
+					break;
+				}
+			}
+			if(!isUse){
+				SetBlock(GenerateLabel("block_"+blockId+".png", 0, 0), blockId);
+				pManager.AddSlot(blockId);
+				return;
+			}
+		}
+	}
+	public void RemoveBlock(String blockId) 
+	{
+		pManager.GetPosition(blockId).SetState(State.EMPTY);
+		blockPanel.remove(blocks.get(blockId));
+		blockPanel.repaint();
+		blocks.remove(blockId);
+		pManager.UpdateDisplay();
+	}
+
+	public static JLabel GenerateLabel(String imgName, int x, int y) 
 	{
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
 		MediaTracker tracker = new MediaTracker(instance);
@@ -106,7 +161,7 @@ public class Graphical_sample extends JPanel
 		tracker.addImage(smallImg, 1);
 		ImageIcon smallIcon = new ImageIcon(smallImg);
 		JLabel label = new JLabel(smallIcon);
-		label.setBounds((int) (x * scale), (int) (y * scale), (int) (witdh * scale), (int) (height * scale));
+		label.setBounds((int) (x * scale), (int) (y * scale), (int) (smallIcon.getIconWidth()), (int) (smallIcon.getIconHeight()));
 		return label;
 	}
 
@@ -306,6 +361,9 @@ public class Graphical_sample extends JPanel
 	{
 		instance.blocks.get(blockId).setLocation((int) (pos.x * scale), (int) (pos.y * scale));
 	}
+	private boolean includes(int lower, int upper, int value) {
+		return lower <= value && value <= upper;
+	}
 
 	private class MyMouseListener extends MouseAdapter 
 	{
@@ -333,7 +391,7 @@ public class Graphical_sample extends JPanel
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;
 			blocks.get(blockId).setLocation(x, y);
-			
+
 			// 各ポジションの判定
 			ArrayList<Position> positions = pManager.GetAllPosition();
 			for (Position pos : positions) {
@@ -351,7 +409,7 @@ public class Graphical_sample extends JPanel
 		public void mousePressed(MouseEvent e) 
 		{
 			canDrag = true;
-			
+
 			//			// 上にブロックがある場合は動かせない処理
 			//			po posName = PosName.arm;
 			//			for (PosName pn : PosName.values()) {
@@ -376,11 +434,11 @@ public class Graphical_sample extends JPanel
 
 			// 前状態を削除
 			prevPos = pManager.GetPosition(blockId);
-			prevPos.SetState(State.EMPTY);
+			//prevPos.SetState(State.EMPTY);
 
 			//最前列に移動
 			blockPanel.add(blocks.get(blockId),0);
-			
+
 			pManager.UpdateDisplay();	//描画状態を更新
 
 			// 押さえたところからラベルの左上の差を取っておく
@@ -397,10 +455,16 @@ public class Graphical_sample extends JPanel
 			if (!canDrag) {return;}
 
 			swapLabel.setVisible(false);
-			
+
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;
 			Position currentPos = prevPos;
+			
+			//ゴミ箱の上なら削除
+			if(IsOnDustbox(x, y)){
+				RemoveBlock(blockId);
+				return;
+			}
 
 			// 各ポジションの判定
 			ArrayList<Position> positions = pManager.GetAllPosition();
@@ -435,8 +499,47 @@ public class Graphical_sample extends JPanel
 			}
 			return false;
 		}
-		private boolean includes(int lower, int upper, int value) {
-			return lower <= value && value <= upper;
+		private boolean IsOnDustbox(int x, int y) 
+		{
+			int range = (int)(dustboxLabels[0].getSize().width * 0.5);
+			int posX = dustboxLabels[0].getX();
+			int posY = dustboxLabels[0].getY();
+			if (includes(posX - range, posX + range, x)
+					&& includes(posY - range, posY + range, y)) {
+				return true;
+			}
+			return false;
+		}
+
+
+	}
+	private class AddMouseListener extends MouseAdapter 
+	{
+		int dx,dy;
+		//ドラッグ開始時の処理
+		public void mousePressed(MouseEvent e) 
+		{
+			addLabels[0].setVisible(false);
+			addLabels[1].setVisible(true);
+			dx = e.getXOnScreen() - addLabels[0].getX();
+			dy = e.getYOnScreen() - addLabels[0].getY();
+		}
+		//ドラッグ終了時の処理
+		public void mouseReleased(MouseEvent e) 
+		{
+			addLabels[0].setVisible(true);
+			addLabels[1].setVisible(false);
+
+			//ボタンの上で話した場合のみクリックと判定
+			int range = (int)(addLabels[0].getSize().width * 0.5);
+			int x = e.getXOnScreen() - dx;
+			int y = e.getYOnScreen() - dy;
+			int posX = addLabels[0].getX();
+			int posY = addLabels[0].getY();
+			if (includes(posX - range, posX + range, x)
+					&& includes(posY - range, posY + range, y)) {
+				AddBlock();
+			}
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package planner;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Stack;
 
 import javax.swing.DebugGraphics;
@@ -25,7 +26,7 @@ public class PositionManager
 		public Position() 
 		{
 			state = State.EMPTY;
-			emplyLabel = Graphical_sample.GenerateLabel("empty.png", x, y, 128, 128);
+			emplyLabel = Graphical_sample.GenerateLabel("empty.png", x, y);
 			Graphical_sample.instance.blankPanel.add(emplyLabel);
 		}
 		// 座標と同時に点線パネルとブロックの描画も更新する
@@ -71,6 +72,11 @@ public class PositionManager
 			SetState(State.FILL);
 			Graphical_sample.SetBlockPosition(blockId,this);
 		}
+		public void Destroy() 
+		{
+			Graphical_sample.instance.blankPanel.remove(emplyLabel);getClass();
+			Graphical_sample.instance.blankPanel.repaint();		
+		}
 	}
 	public Position arm;
 	public ArrayList<Stack<Position>> table;		
@@ -92,12 +98,26 @@ public class PositionManager
 		Position pos = slots.peek();
 		pos.blockId = blockId;
 		pos.state = State.FILL;
-		pos.SetPosition(50 + (80 * slots.size()), 500);
-		
+
 		slots.add(new Position());
-		pos = slots.peek();
-		pos.state = State.EMPTY;
-		pos.SetPosition(50 + (80 * slots.size()), 500);
+
+		UpdateDisplay();
+	}
+	public void RemoveSlot() 
+	{
+
+	}
+	private void UpdateSlot()
+	{
+		Iterator<Position> itr = slots.iterator();
+		while (itr.hasNext()) {
+			Position pos = itr.next();
+			if(pos.EqualState(State.EMPTY)){
+				pos.Destroy();
+				itr.remove();
+			}
+		}
+		slots.add(new Position());
 	}
 	public ArrayList<Position> GetAllPosition() 
 	{
@@ -121,21 +141,29 @@ public class PositionManager
 	}
 	public void SetBlock(Position nextPos, String nextBlockId, Position prevPos) 
 	{
-		if(prevPos != null && nextPos.EqualState(State.FILL)){
-			String opBlockId = nextPos.blockId;
-			prevPos.SetBlock(opBlockId);			
+		if(prevPos != null){
+			if(nextPos.EqualState(State.FILL)){
+				String opBlockId = nextPos.blockId;
+				prevPos.SetBlock(opBlockId);			
+			}else{
+				prevPos.SetState(State.EMPTY);
+			}
 		}
 		nextPos.SetBlock(nextBlockId);
 	}
 	public void UpdateDisplay() 
 	{
-		arm.SetPosition(448, 64);
+		UpdateSlot();
+		arm.SetPosition(811, 62);
 		for (Stack<Position> stack : table) {
 			for(Position pos : stack){
-				int _x = 64 + (192 * table.indexOf(stack));
-				int _y = 352 - (128 * stack.indexOf(pos));
+				int _x = 300 + (192 * table.indexOf(stack));
+				int _y = 340 - (128 * stack.indexOf(pos));
 				pos.SetPosition(_x,_y);
 			}
+		}
+		for(Position pos : slots){
+			pos.SetPosition(200 + (150 * slots.indexOf(pos)),540);
 		}
 
 		//		// 左上の判定

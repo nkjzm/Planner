@@ -61,10 +61,10 @@ public class GUI extends JFrame {
 		lblStart.setBounds(10, 12, 61, 15);
 		contentPane.add(lblStart);
 
-		float graphical_scale = 0.5f;
+		float graphical_scale = 0.4f;
 
 		startArrange = new Graphical_sample(graphical_scale);
-		startArrange.setBounds(10, 40, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		startArrange.setBounds(10, 40, startArrange.getSize().width, startArrange.getSize().height);
 		contentPane.add(startArrange);
 
 		JLabel lblFinish = new JLabel("Finish");
@@ -72,7 +72,7 @@ public class GUI extends JFrame {
 		contentPane.add(lblFinish);
 
 		goalArrange = new Graphical_sample(graphical_scale);
-		goalArrange.setBounds(10, 440, (int)(800*graphical_scale), (int)(608*graphical_scale));
+		goalArrange.setBounds(10, 440, goalArrange.getSize().width, goalArrange.getSize().height);
 		contentPane.add(goalArrange);
 
 		progressArrange = new Graphical_sample(graphical_scale);
