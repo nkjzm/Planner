@@ -30,6 +30,8 @@ public class Graphical_sample extends JPanel
 	public JPanel bgPanel;
 	public JPanel blankPanel;
 	public JPanel blockPanel;
+	public JPanel uiPanel;
+	public JLabel swapLabel;
 
 
 	public static void main(String args[]) 
@@ -61,24 +63,11 @@ public class Graphical_sample extends JPanel
 
 		this.setLayout(new OverlayLayout(this));
 
-		//背景描画用
-		bgPanel = new JPanel();
-		bgPanel.setOpaque(false);
-		bgPanel.setLayout(null);
-		this.add(bgPanel,0);
-
-		//点線パネル描画用
-		blankPanel = new JPanel();
-		blankPanel.setOpaque(false);
-		blankPanel.setLayout(null);
-		this.add(blankPanel,0);
-
-		//ブロック描画用
-		blockPanel = new JPanel();
-		blockPanel.setOpaque(false);
-		blockPanel.setLayout(null);
-		this.add(blockPanel,0);
-
+		InitPanel(bgPanel = new JPanel());		//背景描画用
+		InitPanel(blankPanel = new JPanel());	//点線パネル描画用
+		InitPanel(blockPanel = new JPanel());	//ブロック描画用
+		InitPanel(uiPanel = new JPanel());		//UI描画用
+		
 		pManager = new PositionManager();
 
 		// ブロック
@@ -95,7 +84,18 @@ public class Graphical_sample extends JPanel
 		JLabel floor = GenerateLabel("floor.png", 0, 480, 640, 128);
 		bgPanel.add(floor);
 
+		swapLabel = GenerateLabel("swap.png", 700, 700, 111, 85);
+		uiPanel.add(swapLabel, 0);
+		swapLabel.setVisible(false);
+
 		pManager.UpdateDisplay();
+	}
+	
+	private void  InitPanel(JPanel panel) 
+	{
+		panel.setOpaque(false);
+		panel.setLayout(null);
+		this.add(panel,0);
 	}
 
 	public static JLabel GenerateLabel(String imgName, int x, int y, int witdh, int height) 
@@ -333,6 +333,18 @@ public class Graphical_sample extends JPanel
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;
 			blocks.get(blockId).setLocation(x, y);
+			
+			// 各ポジションの判定
+			ArrayList<Position> positions = pManager.GetAllPosition();
+			for (Position pos : positions) {
+				if(IsFit(x, y, pos) && pos.EqualState(State.FILL))
+				{
+					swapLabel.setLocation(x + (int)(10*scale), y + (int)(20*scale));
+					swapLabel.setVisible(true);
+					return;
+				}
+			}
+			swapLabel.setVisible(false);
 		}
 
 		//ドラッグ開始時の処理
@@ -367,7 +379,7 @@ public class Graphical_sample extends JPanel
 			prevPos.SetState(State.EMPTY);
 
 			//最前列に移動
-			instance.add(blocks.get(blockId),0);
+			blockPanel.add(blocks.get(blockId),0);
 			
 			pManager.UpdateDisplay();	//描画状態を更新
 
@@ -384,6 +396,8 @@ public class Graphical_sample extends JPanel
 			//ドラッグ状態となっていなければreturn
 			if (!canDrag) {return;}
 
+			swapLabel.setVisible(false);
+			
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;
 			Position currentPos = prevPos;
