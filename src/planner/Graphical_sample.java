@@ -92,7 +92,7 @@ public class Graphical_sample extends JPanel
 		//ゴミ箱
 		dustboxLabels = new JLabel[2];
 		for(int i=0;i<2;++i){
-			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:13, i==0?477:388);
+			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:12, i==0?478:388);
 			bgPanel.add(dustboxLabels[i]);
 		}
 		dustboxLabels[1].setVisible(false);
@@ -392,10 +392,20 @@ public class Graphical_sample extends JPanel
 			int y = e.getYOnScreen() - dy;
 			blocks.get(blockId).setLocation(x, y);
 
+			//ゴミ箱の上なら削除
+			if(IsOnDustbox(x, y)){
+				dustboxLabels[0].setVisible(false);
+				dustboxLabels[1].setVisible(true);
+				return;
+			}
+			dustboxLabels[0].setVisible(true);
+			dustboxLabels[1].setVisible(false);
+			
 			// 各ポジションの判定
 			ArrayList<Position> positions = pManager.GetAllPosition();
 			for (Position pos : positions) {
-				if(IsFit(x, y, pos) && pos.EqualState(State.FILL))
+				if(IsFit(x, y, pos) && pos.EqualState(State.FILL) 
+						&& !pManager.GetPosition(blockId).equals(pos))
 				{
 					swapLabel.setLocation(x + (int)(10*scale), y + (int)(20*scale));
 					swapLabel.setVisible(true);
@@ -455,6 +465,8 @@ public class Graphical_sample extends JPanel
 			if (!canDrag) {return;}
 
 			swapLabel.setVisible(false);
+			dustboxLabels[0].setVisible(true);
+			dustboxLabels[1].setVisible(false);
 
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;

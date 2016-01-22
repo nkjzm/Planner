@@ -103,10 +103,6 @@ public class PositionManager
 
 		UpdateDisplay();
 	}
-	public void RemoveSlot() 
-	{
-
-	}
 	private void UpdateSlot()
 	{
 		Iterator<Position> itr = slots.iterator();
@@ -163,8 +159,9 @@ public class PositionManager
 			}
 		}
 		for(Position pos : slots){
-			pos.SetPosition(200 + (150 * slots.indexOf(pos)),540);
+			pos.SetPosition(180 + ((820/slots.size()) * slots.indexOf(pos)),540);
 		}
+		slots.peek().SetPosition(slots.peek().x + (slots.size() * 5), slots.peek().y);
 
 		//		// 左上の判定
 		//		if (positions.get(PosName.left_top).GetState() != State.FILL) {
