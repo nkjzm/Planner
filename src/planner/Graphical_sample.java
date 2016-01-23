@@ -1,6 +1,7 @@
 package planner;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
@@ -10,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,16 +27,17 @@ import javax.swing.OverlayLayout;
 import javax.swing.text.LayeredHighlighter.LayerPainter;
 
 import planner.PositionManager.Position;
-import planner.PositionManager.State;
 
 public class Graphical_sample extends JPanel 
 {
 	public static float scale;
+	public static float blockScale;
 	public static Graphical_sample instance;
 	public JPanel bgPanel;
 	public JPanel blankPanel;
 	public JPanel blockPanel;
 	public JPanel uiPanel;
+	public JLabel arm;
 	public JLabel swapLabel;
 	public JLabel[] dustboxLabels;
 	public JLabel[] addLabels;
@@ -65,9 +69,10 @@ public class Graphical_sample extends JPanel
 	Graphical_sample(float scale) 
 	{
 		this.scale = scale;
+		blockScale = scale;
 		instance = this;
 		this.setLayout(null);
-		setBounds(0, 0, (int) (1280 * scale), (int) (720 * scale));
+		setBounds(0, 0, (int) (1280 * scale), (int) (960 * scale));
 
 		this.setLayout(new OverlayLayout(this));
 
@@ -84,22 +89,25 @@ public class Graphical_sample extends JPanel
 		}
 
 		//背景
-		JLabel bg = GenerateLabel("bg.png", 0, 470);
+		JLabel bg = GenerateLabel("bg.png", 0, 710);
 		bgPanel.add(bg);
+
 		//アーム
-		JLabel arm = GenerateLabel("arm.png", 800, 0);
+		arm = GenerateLabel("arm.png", 800, 0);
 		bgPanel.add(arm);
+
 		//ゴミ箱
 		dustboxLabels = new JLabel[2];
 		for(int i=0;i<2;++i){
-			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:12, i==0?478:388);
+			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:12, i==0?718:628);
 			bgPanel.add(dustboxLabels[i]);
 		}
 		dustboxLabels[1].setVisible(false);
+
 		//追加ボタン
 		addLabels = new JLabel[2];
 		for(int i=0;i<2;++i){
-			addLabels[i] = GenerateLabel("add_"+i+".png", 1121, 540);
+			addLabels[i] = GenerateLabel("add_"+i+".png", 1121, 780);
 			bgPanel.add(addLabels[i]);
 		}
 		AddMouseListener listener = new AddMouseListener();
@@ -109,7 +117,7 @@ public class Graphical_sample extends JPanel
 		addLabels[1].setOpaque(false);
 
 		//UIパーツ
-		swapLabel = GenerateLabel("swap.png", 700, 700);
+		swapLabel = GenerateLabel("swap.png", 0, 0);
 		uiPanel.add(swapLabel, 0);
 		swapLabel.setVisible(false);
 
@@ -146,23 +154,54 @@ public class Graphical_sample extends JPanel
 	}
 	public void RemoveBlock(String blockId) 
 	{
-		pManager.GetPosition(blockId).SetState(State.EMPTY);
+		RemoveBlock(blockId,false);
+	}
+	public void RemoveBlock(String blockId,Boolean selfRemove) 
+	{
 		blockPanel.remove(blocks.get(blockId));
 		blockPanel.repaint();
-		blocks.remove(blockId);
-		pManager.UpdateDisplay();
+		if(!selfRemove){
+			pManager.GetPosition(blockId).SetIsEmpty(true);
+			blocks.remove(blockId);
+		}
 	}
 
 	public static JLabel GenerateLabel(String imgName, int x, int y) 
 	{
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
 		MediaTracker tracker = new MediaTracker(instance);
-		Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * scale), -1, Image.SCALE_SMOOTH);
+		Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * blockScale), -1, Image.SCALE_SMOOTH);
 		tracker.addImage(smallImg, 1);
 		ImageIcon smallIcon = new ImageIcon(smallImg);
 		JLabel label = new JLabel(smallIcon);
 		label.setBounds((int) (x * scale), (int) (y * scale), (int) (smallIcon.getIconWidth()), (int) (smallIcon.getIconHeight()));
 		return label;
+	}
+	
+	public void UpdateBlockScale() 
+	{
+		blockScale *= 0.8;
+		HashMap<String, JLabel> tmpBlocks = new HashMap<>(blocks);
+		Iterator<String> iterator = blocks.keySet().iterator();
+		while(iterator.hasNext()) {
+			String blockId = iterator.next();
+			RemoveBlock(blockId,true);
+			iterator.remove();
+		}
+		blocks.clear();
+		for (String blockId : tmpBlocks.keySet()) {
+			SetBlock(GenerateLabel("block_"+blockId+".png", 0, 0), blockId);
+		}
+		ArrayList<Position> positions = pManager.GetAllPosition();
+		blankPanel.removeAll();
+		for (Position position : positions) {
+			position.emplyLabel = GenerateLabel("empty.png", 0, 0);
+			blankPanel.add(position.emplyLabel);
+		}
+		bgPanel.remove(arm);
+		arm = GenerateLabel("arm.png", 800, 0);
+		bgPanel.add(arm);
+		pManager.UpdateDisplay();	
 	}
 
 	private void SetBlock(JLabel label, String Id) 
@@ -400,15 +439,16 @@ public class Graphical_sample extends JPanel
 			}
 			dustboxLabels[0].setVisible(true);
 			dustboxLabels[1].setVisible(false);
-			
+
 			// 各ポジションの判定
 			ArrayList<Position> positions = pManager.GetAllPosition();
 			for (Position pos : positions) {
-				if(IsFit(x, y, pos) && pos.EqualState(State.FILL) 
+				if(IsFit(x, y, pos) && !pos.GetIsEmpty() 
 						&& !pManager.GetPosition(blockId).equals(pos))
 				{
 					swapLabel.setLocation(x + (int)(10*scale), y + (int)(20*scale));
 					swapLabel.setVisible(true);
+					blocks.get(pos.GetBlockId()).setBackground(new Color(1, 1, 1, 150));
 					return;
 				}
 			}
@@ -471,10 +511,11 @@ public class Graphical_sample extends JPanel
 			int x = e.getXOnScreen() - dx;
 			int y = e.getYOnScreen() - dy;
 			Position currentPos = prevPos;
-			
+
 			//ゴミ箱の上なら削除
 			if(IsOnDustbox(x, y)){
 				RemoveBlock(blockId);
+				pManager.UpdateDisplay();
 				return;
 			}
 
@@ -483,9 +524,6 @@ public class Graphical_sample extends JPanel
 			for (Position pos : positions) {
 				if(IsFit(x, y, pos))
 				{
-					//無効なブロック上ならbreak;
-					if (pos.EqualState(State.DISABLE)) {break;}
-
 					//位置の更新
 					//異動先にブロックがある場合はスワップ
 					pManager.SetBlock(pos,blockId,prevPos);

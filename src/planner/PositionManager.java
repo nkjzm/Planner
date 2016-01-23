@@ -10,22 +10,16 @@ import javax.swing.JPanel;
 
 public class PositionManager
 {
-	public enum State 
-	{
-		FILL,	//ブロックが入っている状態
-		EMPTY,	//ブロックが入っていない状態
-		DISABLE	//非表示
-	}
 	public class Position 
 	{
 		public int x;
 		public int y;
-		private State state;
+		private Boolean isEmpty;
 		public JLabel emplyLabel;
 		private String blockId;
 		public Position() 
 		{
-			state = State.EMPTY;
+			isEmpty = true;
 			emplyLabel = Graphical_sample.GenerateLabel("empty.png", x, y);
 			Graphical_sample.instance.blankPanel.add(emplyLabel);
 		}
@@ -38,30 +32,21 @@ public class PositionManager
 					(int) (x * Graphical_sample.scale),
 					(int) (y * Graphical_sample.scale)
 					);
-			if(state.equals(State.FILL)){
+			if(!isEmpty){
 				Graphical_sample.SetBlockPosition(blockId, this);
 			}
 		}
-		public void SetState(State s) 
+		public void SetIsEmpty(Boolean flg) 
 		{
-			state = s;
-			if (state == State.DISABLE) {
-				emplyLabel.setVisible(false);
-			} else {
-				emplyLabel.setVisible(true);
-			}
+			isEmpty = flg;
 		}
-		public State GetState() 
+		public Boolean GetIsEmpty() 
 		{
-			return state;
-		}
-		public boolean EqualState(State opState) 
-		{
-			return state.equals(opState);
+			return isEmpty;
 		}
 		public String GetBlockId() 
 		{
-			if(EqualState(State.FILL)){
+			if(!isEmpty){
 				return blockId;
 			}
 			return null;
@@ -69,7 +54,7 @@ public class PositionManager
 		public void SetBlock(String blockId) 
 		{
 			this.blockId = blockId;
-			SetState(State.FILL);
+			isEmpty = false;
 			Graphical_sample.SetBlockPosition(blockId,this);
 		}
 		public void Destroy() 
@@ -97,7 +82,7 @@ public class PositionManager
 	{
 		Position pos = slots.peek();
 		pos.blockId = blockId;
-		pos.state = State.FILL;
+		pos.isEmpty = false;
 
 		slots.add(new Position());
 
@@ -108,7 +93,7 @@ public class PositionManager
 		Iterator<Position> itr = slots.iterator();
 		while (itr.hasNext()) {
 			Position pos = itr.next();
-			if(pos.EqualState(State.EMPTY)){
+			if(pos.isEmpty){
 				pos.Destroy();
 				itr.remove();
 			}
@@ -129,7 +114,7 @@ public class PositionManager
 	{
 		ArrayList<Position> positions = GetAllPosition();
 		for (Position pos : positions) {
-			if (pos.state.equals(State.FILL) && pos.blockId.equals(blockId)) {
+			if (!pos.isEmpty && pos.blockId.equals(blockId)) {
 				return pos;
 			}
 		}
@@ -138,73 +123,53 @@ public class PositionManager
 	public void SetBlock(Position nextPos, String nextBlockId, Position prevPos) 
 	{
 		if(prevPos != null){
-			if(nextPos.EqualState(State.FILL)){
+			if(!nextPos.isEmpty){
 				String opBlockId = nextPos.blockId;
 				prevPos.SetBlock(opBlockId);			
 			}else{
-				prevPos.SetState(State.EMPTY);
+				prevPos.isEmpty = true;
 			}
 		}
 		nextPos.SetBlock(nextBlockId);
 	}
 	public void UpdateDisplay() 
 	{
-		UpdateSlot();
-		arm.SetPosition(811, 62);
-		for (Stack<Position> stack : table) {
-			for(Position pos : stack){
-				int _x = 300 + (192 * table.indexOf(stack));
-				int _y = 340 - (128 * stack.indexOf(pos));
-				pos.SetPosition(_x,_y);
-			}
-		}
+		UpdateSlot();	//スロットの内部状態を更新
 		for(Position pos : slots){
-			pos.SetPosition(180 + ((820/slots.size()) * slots.indexOf(pos)),540);
+			pos.SetPosition(180 + ((820/slots.size()) * slots.indexOf(pos)),780);
 		}
 		slots.peek().SetPosition(slots.peek().x + (slots.size() * 5), slots.peek().y);
 
-		//		// 左上の判定
-		//		if (positions.get(PosName.left_top).GetState() != State.FILL) {
-		//			if (positions.get(PosName.left_middle).GetState() == State.FILL) {
-		//				positions.get(PosName.left_top).SetState(State.EMPTY);
-		//			} else {
-		//				positions.get(PosName.left_top).SetState(State.DISABLE);
-		//			}
-		//		}
-		//		// 左中段の判定
-		//		if (positions.get(PosName.left_middle).GetState() != State.FILL) {
-		//			if (positions.get(PosName.left_bottom).GetState() == State.FILL) {
-		//				positions.get(PosName.left_middle).SetState(State.EMPTY);
-		//			} else {
-		//				positions.get(PosName.left_middle).SetState(State.DISABLE);
-		//			}
-		//		}
-		//		// 左下は常時表示
-		//		// 中央中段の判定
-		//		if (positions.get(PosName.center_middle).GetState() != State.FILL) {
-		//			if (positions.get(PosName.center_bottom).GetState() == State.FILL) {
-		//				positions.get(PosName.center_middle).SetState(State.EMPTY);
-		//			} else {
-		//				positions.get(PosName.center_middle).SetState(State.DISABLE);
-		//			}
-		//		}
-		//		// 中央下の判定
-		//		if (positions.get(PosName.center_bottom).GetState() != State.FILL) {
-		//			if (positions.get(PosName.left_bottom).GetState() == State.FILL) {
-		//				positions.get(PosName.center_bottom).SetState(State.EMPTY);
-		//			} else {
-		//				positions.get(PosName.center_bottom).SetState(State.DISABLE);
-		//			}
-		//		}
-		//		// 右下の判定
-		//		if (positions.get(PosName.right_bottom).GetState() != State.FILL) {
-		//			if (positions.get(PosName.left_bottom).GetState() == State.FILL
-		//					&& positions.get(PosName.center_bottom).GetState() == State.FILL) {
-		//				positions.get(PosName.right_bottom).SetState(State.EMPTY);
-		//			} else {
-		//				positions.get(PosName.right_bottom).SetState(State.DISABLE);
-		//			}
-		//		}
+		arm.SetPosition(811, 62);
+		
+		Iterator<Stack<Position>> listItr = table.iterator();
+		while (listItr.hasNext()) {
+			Stack<Position> stack = listItr.next();
+			Iterator<Position> stackItr = stack.iterator();
+			while (stackItr.hasNext()) {
+				Position pos = stackItr.next();
+				if(pos.isEmpty){
+					pos.Destroy();
+					stackItr.remove();
+				}
+			}
+			if(stack.empty()){
+				listItr.remove();
+			}else{
+				stack.add(new Position());
+			}
+		}
+		table.add(new Stack<Position>());
+		table.get(table.size()-1).add(new Position());
 
+		for (Stack<Position> stack : table) {
+			for(Position pos : stack){
+				int _x = 220 + ((800/table.size()) * table.indexOf(stack));
+				int _y = 580 - (128 * stack.indexOf(pos));
+				pos.SetPosition(_x,_y);
+			}
+		}
+		Position peekY = table.get(table.size()-1).peek();
+		peekY.SetPosition(peekY.x + (table.size() * 5), peekY.y);
 	}
 }
