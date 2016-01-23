@@ -25,9 +25,9 @@ import javax.swing.border.EmptyBorder;
 
 public class GUI extends JFrame {
 	private JPanel contentPane;
-	Graphical_sample startArrange;
-	Graphical_sample progressArrange;
-	Graphical_sample goalArrange;
+	GraphicalPlanner startArrange;
+	GraphicalPlanner progressArrange;
+	GraphicalPlanner goalArrange;
 	int index = 0;
 	ArrayList<ArrayList<String>> progressStates;
 	ArrayList<String> ProgressResult;
@@ -68,26 +68,26 @@ public class GUI extends JFrame {
 		lblStart.setBounds(50, 400, 100, 25);
 		contentPane.add(lblStart);
 
-		float graphical_scale = 0.4f;
+		float graphical_scale = 0.3f;
 
-		startArrange = new Graphical_sample(graphical_scale);
-		startArrange.setBounds(50, 420, (int)(1275*graphical_scale), (int)(700*graphical_scale));
+		startArrange = new GraphicalPlanner(graphical_scale);
+		startArrange.setBounds(50, 420, startArrange.getWidth(),startArrange.getHeight());
 		contentPane.add(startArrange);
 
 		JLabel lblFinish = new JLabel("Finish");
 		lblFinish.setBounds(800, 400,100, 25);
 		contentPane.add(lblFinish);
 
-		goalArrange = new Graphical_sample(graphical_scale);
-		goalArrange.setBounds(800, 420, (int)(1275*graphical_scale), (int)(700*graphical_scale));
+		goalArrange = new GraphicalPlanner(graphical_scale);
+		goalArrange.setBounds(800, 420, goalArrange.getWidth(),goalArrange.getHeight());
 		contentPane.add(goalArrange);
 
 		JLabel lblProgress = new JLabel("Progress");
 		lblProgress.setBounds(425,30,100,25);
 		contentPane.add(lblProgress);
 
-		progressArrange = new Graphical_sample(graphical_scale);
-		progressArrange.setBounds(400, 130, (int)(1275*graphical_scale), (int)(700*graphical_scale));
+		progressArrange = new GraphicalPlanner(graphical_scale);
+		progressArrange.setBounds(400, 130, progressArrange.getWidth(),progressArrange.getHeight());
 		label2.add(progressArrange);
 
 		JScrollPane scrollPane_2 = new JScrollPane();

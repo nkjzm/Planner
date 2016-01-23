@@ -28,11 +28,10 @@ import javax.swing.text.LayeredHighlighter.LayerPainter;
 
 import planner.PositionManager.Position;
 
-public class Graphical_sample extends JPanel 
+public class GraphicalPlanner extends JPanel 
 {
 	public static float scale;
 	public static float blockScale;
-	public static Graphical_sample instance;
 	public JPanel bgPanel;
 	public JPanel blankPanel;
 	public JPanel blockPanel;
@@ -46,7 +45,7 @@ public class Graphical_sample extends JPanel
 
 	public static void main(String args[]) 
 	{
-		Graphical_sample aaa = new Graphical_sample(0.5f);
+		GraphicalPlanner aaa = new GraphicalPlanner(0.5f);
 		JFrame jframe = new JFrame("DrawRect");
 		jframe.setVisible(true);
 		Container c = jframe.getContentPane();
@@ -66,11 +65,10 @@ public class Graphical_sample extends JPanel
 	HashMap<String, JLabel> blocks = new HashMap<String, JLabel>();
 	private PositionManager pManager;
 
-	Graphical_sample(float scale) 
+	GraphicalPlanner(float scale) 
 	{
 		this.scale = scale;
 		blockScale = scale;
-		instance = this;
 		this.setLayout(null);
 		setBounds(0, 0, (int) (1280 * scale), (int) (960 * scale));
 
@@ -81,7 +79,7 @@ public class Graphical_sample extends JPanel
 		InitPanel(blockPanel = new JPanel());	//ブロック描画用
 		InitPanel(uiPanel = new JPanel());		//UI描画用
 
-		pManager = new PositionManager();
+		pManager = new PositionManager(this);
 
 		//ブロック
 		for(int i = 0;i<3;++i){
@@ -166,10 +164,10 @@ public class Graphical_sample extends JPanel
 		}
 	}
 
-	public static JLabel GenerateLabel(String imgName, int x, int y) 
+	public JLabel GenerateLabel(String imgName, int x, int y) 
 	{
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
-		MediaTracker tracker = new MediaTracker(instance);
+		MediaTracker tracker = new MediaTracker(this);
 		Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * blockScale), -1, Image.SCALE_SMOOTH);
 		tracker.addImage(smallImg, 1);
 		ImageIcon smallIcon = new ImageIcon(smallImg);
@@ -396,9 +394,9 @@ public class Graphical_sample extends JPanel
 		}
 	}
 
-	public static void SetBlockPosition(String blockId, Position pos) 
+	public void SetBlockPosition(String blockId, Position pos) 
 	{
-		instance.blocks.get(blockId).setLocation((int) (pos.x * scale), (int) (pos.y * scale));
+		blocks.get(blockId).setLocation((int) (pos.x * scale), (int) (pos.y * scale));
 	}
 	private boolean includes(int lower, int upper, int value) {
 		return lower <= value && value <= upper;

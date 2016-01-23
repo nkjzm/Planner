@@ -20,8 +20,8 @@ public class PositionManager
 		public Position() 
 		{
 			isEmpty = true;
-			emplyLabel = Graphical_sample.GenerateLabel("empty.png", x, y);
-			Graphical_sample.instance.blankPanel.add(emplyLabel);
+			emplyLabel = gPlanner.GenerateLabel("empty.png", x, y);
+			gPlanner.blankPanel.add(emplyLabel);
 		}
 		// 座標と同時に点線パネルとブロックの描画も更新する
 		public void SetPosition(int _x,int _y) 
@@ -29,11 +29,11 @@ public class PositionManager
 			x = _x;
 			y = _y;
 			emplyLabel.setLocation(
-					(int) (x * Graphical_sample.scale),
-					(int) (y * Graphical_sample.scale)
+					(int) (x * GraphicalPlanner.scale),
+					(int) (y * GraphicalPlanner.scale)
 					);
 			if(!isEmpty){
-				Graphical_sample.SetBlockPosition(blockId, this);
+				gPlanner.SetBlockPosition(blockId, this);
 			}
 		}
 		public void SetIsEmpty(Boolean flg) 
@@ -55,19 +55,21 @@ public class PositionManager
 		{
 			this.blockId = blockId;
 			isEmpty = false;
-			Graphical_sample.SetBlockPosition(blockId,this);
+			gPlanner.SetBlockPosition(blockId,this);
 		}
 		public void Destroy() 
 		{
-			Graphical_sample.instance.blankPanel.remove(emplyLabel);getClass();
-			Graphical_sample.instance.blankPanel.repaint();		
+			gPlanner.blankPanel.remove(emplyLabel);getClass();
+			gPlanner.blankPanel.repaint();		
 		}
 	}
 	public Position arm;
 	public ArrayList<Stack<Position>> table;		
 	public Stack<Position> slots;
-	public PositionManager() 
+	private GraphicalPlanner gPlanner;
+	public PositionManager(GraphicalPlanner graphicalPlanner) 
 	{
+		gPlanner = graphicalPlanner;
 		arm = new Position();
 		table = new ArrayList<Stack<Position>>();
 		table.add(new Stack<Position>());
