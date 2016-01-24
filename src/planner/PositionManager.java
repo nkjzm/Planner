@@ -12,8 +12,8 @@ public class PositionManager
 {
 	public class Position 
 	{
-		public int x;
-		public int y;
+		public int x = -999;
+		public int y = -999;
 		private Boolean isEmpty;
 		public JLabel emplyLabel;
 		private String blockId;
@@ -29,8 +29,8 @@ public class PositionManager
 			x = _x;
 			y = _y;
 			emplyLabel.setLocation(
-					(int) (x * GraphicalPlanner.scale),
-					(int) (y * GraphicalPlanner.scale)
+					(int) (x * gPlanner.scale),
+					(int) (y * gPlanner.scale)
 					);
 			if(!isEmpty){
 				gPlanner.SetBlockPosition(blockId, this);
@@ -90,6 +90,35 @@ public class PositionManager
 
 		UpdateDisplay();
 	}
+	public void Reset() 
+	{
+		//スロットポジションをデストロイ
+		Iterator<Position> itr = slots.iterator();
+		while (itr.hasNext()) {
+			Position pos = itr.next();
+			pos.Destroy();
+			itr.remove();
+		}
+		//メインポジションをデストロイ
+		Iterator<Stack<Position>> listItr = table.iterator();
+		while (listItr.hasNext()) {
+			Stack<Position> stack = listItr.next();
+			Iterator<Position> stackItr = stack.iterator();
+			while (stackItr.hasNext()) {
+				Position pos = stackItr.next();
+				pos.Destroy();
+				stackItr.remove();
+			}
+		}
+		//アームをデストロイ
+		arm.Destroy();
+
+		arm = new Position();
+		table.add(new Stack<Position>());
+		table.get(table.size()-1).add(new Position());
+		slots = new Stack<>();
+		slots.add(new Position());
+	}
 	private void UpdateSlot()
 	{
 		Iterator<Position> itr = slots.iterator();
@@ -134,16 +163,60 @@ public class PositionManager
 		}
 		nextPos.SetBlock(nextBlockId);
 	}
+	public void PutBlock(String blockId) 
+	{
+		PutBlock(blockId,false);	
+	}
+	public void PutBlock(String blockId, boolean isArm) 
+	{
+		if(isArm){
+			arm.blockId = blockId;
+			arm.isEmpty = false;
+			return;
+		}
+		//新しい列にブロックを追加
+		Position position = table.get(table.size()-1).peek();
+		position.blockId = blockId;
+		position.isEmpty = false;
+		//一つ上のポジションと新しい列のポジションを追加
+		table.get(table.size()-1).add(new Position());
+		table.add(new Stack<Position>());
+		table.get(table.size()-1).add(new Position());
+	}
+	public boolean PutBlock(String blockId, String underBlockId) 
+	{
+		Iterator<Stack<Position>> listItr = table.iterator();
+		while (listItr.hasNext()) {
+			Stack<Position> stack = listItr.next();
+			Iterator<Position> stackItr = stack.iterator();
+			Boolean isFind = false;
+			while (stackItr.hasNext()) {
+				Position position = stackItr.next();
+				if(isFind){
+					position.blockId = blockId;
+					position.isEmpty = false;
+					stack.add(new Position());
+					return true;
+				}
+				if(!position.isEmpty
+						&& position.blockId.equals(underBlockId)){
+					isFind = true;
+				}
+			}
+		}
+		return false;
+	}
 	public void UpdateDisplay() 
 	{
 		UpdateSlot();	//スロットの内部状態を更新
 		for(Position pos : slots){
 			pos.SetPosition(180 + ((820/slots.size()) * slots.indexOf(pos)),780);
 		}
-		slots.peek().SetPosition(slots.peek().x + (slots.size() * 5), slots.peek().y);
+		Position peek = slots.peek();
+		peek.SetPosition(peek.x + (slots.size() * 5), peek.y);
 
 		arm.SetPosition(811, 62);
-		
+
 		Iterator<Stack<Position>> listItr = table.iterator();
 		while (listItr.hasNext()) {
 			Stack<Position> stack = listItr.next();

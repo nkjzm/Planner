@@ -30,8 +30,8 @@ import planner.PositionManager.Position;
 
 public class GraphicalPlanner extends JPanel 
 {
-	public static float scale;
-	public static float blockScale;
+	public float scale;
+	public float blockScale;
 	public JPanel bgPanel;
 	public JPanel blankPanel;
 	public JPanel blockPanel;
@@ -40,8 +40,6 @@ public class GraphicalPlanner extends JPanel
 	public JLabel swapLabel;
 	public JLabel[] dustboxLabels;
 	public JLabel[] addLabels;
-
-	private char peekBlockId = 'a' - 1;
 
 	public static void main(String args[]) 
 	{
@@ -54,12 +52,14 @@ public class GraphicalPlanner extends JPanel
 		jframe.getContentPane().setPreferredSize(new Dimension(aaa.getSize().width,aaa.getSize().height));
 		jframe.pack();
 
-		//		ArrayList<String> tmp = new ArrayList<String>();
-		//		tmp.add("ontable A");
-		//		tmp.add("ontable B");
-		//		tmp.add("C on B");
-		//		tmp.add("clear C");
-		//		aaa.SetBlockArrangement(tmp);
+		ArrayList<String> tmp = new ArrayList<String>();
+		tmp.add("ontable A");
+		tmp.add("ontable B");
+		tmp.add("C on B");
+		tmp.add("I on C");
+		tmp.add("clear C");
+		tmp.add("holding D");
+		aaa.SetBlockArrangement(tmp);
 	}
 
 	HashMap<String, JLabel> blocks = new HashMap<String, JLabel>();
@@ -131,10 +131,9 @@ public class GraphicalPlanner extends JPanel
 
 	public void AddBlock() 
 	{
-		for(int i=0;i<'i'-'a';++i){
-			if(++peekBlockId>'i'){
-				peekBlockId = 'a';
-			}
+		char peekBlockId = 'a' - 1;
+		for(int i=0;i<'i'-'a'+1;++i){
+			++peekBlockId;
 			String blockId = String.valueOf(peekBlockId);
 			Boolean isUse = false;
 			for(String key : blocks.keySet()){
@@ -144,7 +143,7 @@ public class GraphicalPlanner extends JPanel
 				}
 			}
 			if(!isUse){
-				SetBlock(GenerateLabel("block_"+blockId+".png", 0, 0), blockId);
+				SetBlock(GenerateLabel("block_"+blockId+".png", -999, -999), blockId);
 				pManager.AddSlot(blockId);
 				return;
 			}
@@ -175,7 +174,7 @@ public class GraphicalPlanner extends JPanel
 		label.setBounds((int) (x * scale), (int) (y * scale), (int) (smallIcon.getIconWidth()), (int) (smallIcon.getIconHeight()));
 		return label;
 	}
-	
+
 	public void UpdateBlockScale() 
 	{
 		blockScale *= 0.8;
@@ -188,7 +187,7 @@ public class GraphicalPlanner extends JPanel
 		}
 		blocks.clear();
 		for (String blockId : tmpBlocks.keySet()) {
-			SetBlock(GenerateLabel("block_"+blockId+".png", 0, 0), blockId);
+			SetBlock(GenerateLabel("block_"+blockId+".png", -999, -999), blockId);
 		}
 		ArrayList<Position> positions = pManager.GetAllPosition();
 		blankPanel.removeAll();
@@ -210,6 +209,16 @@ public class GraphicalPlanner extends JPanel
 		label.addMouseListener(listener);
 		label.addMouseMotionListener(listener);
 		blockPanel.add(label, 0);
+	}
+
+	public void Reset() 
+	{
+		Iterator<String> iterator = blocks.keySet().iterator();
+		while(iterator.hasNext()){
+			String blockId = iterator.next();
+			RemoveBlock(blockId, true);
+			iterator.remove();
+		}
 	}
 
 	public ArrayList<String> getCurrentState() 
@@ -269,129 +278,70 @@ public class GraphicalPlanner extends JPanel
 
 	public void SetBlockArrangement(ArrayList<String> state) 
 	{
+		pManager.Reset();
+		Reset();
+
 		Pattern p = Pattern.compile("handEmpty");
-		for (String st : state) {
+		Iterator<String> iterator = state.iterator();
+		while(iterator.hasNext()) {
+			String st = iterator.next();
 			Matcher m = p.matcher(st);
 			if (m.find()) {
-				state.remove(st);
+				iterator.remove();
 				break;
 			}
 		}
 
 		p = Pattern.compile("holding (.)");
-		for (String st : state) {
+		iterator = state.iterator();
+		while(iterator.hasNext()) {
+			String st = iterator.next();
 			Matcher m = p.matcher(st);
-			//見つからなかったら続ける
-			if (!m.find()) {
-				continue;
-			}
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(m.group(1), PosName.arm);
-			state.remove(st);
-			break;
-		}
-
-		//配置情報を表現する二次元配列
-		//初めのインデックスが列数(左から)、次のインデックスが行数(下から)
-		String keyPos[][] = new String[3][3];
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; ++j) {
-				keyPos[i][j] = "";
+			if (m.find()) {
+				String blockId = m.group(1).toLowerCase();
+				SetBlock(GenerateLabel("block_"+blockId+".png", -999, -999), blockId);
+				pManager.PutBlock(blockId,true);
+				iterator.remove();
+				break;
 			}
 		}
 
-		int it = 0;
 		p = Pattern.compile("ontable (.)");
-		while(true){
-			boolean isFind = false;
-			for (String st : state) {
-				Matcher m = p.matcher(st);
-				//見つからなかったら続ける
-				if (!m.find()) {
-					continue;
-				}
-				isFind = true;
-				keyPos[it++][0] = m.group(1);
-				state.remove(st);
-				break;
-			}
-			//見つからなくなったら終了
-			if(!isFind){
-				break;
+		iterator = state.iterator();
+		while(iterator.hasNext()) {
+			String st = iterator.next();
+			Matcher m = p.matcher(st);
+			if (m.find()) {
+				String blockId = m.group(1).toLowerCase();
+				SetBlock(GenerateLabel("block_"+blockId+".png", -999, -999), blockId);
+				pManager.PutBlock(blockId);
+				iterator.remove();
 			}
 		}
 
-
-		it = 0;
 		p = Pattern.compile("(.) on (.)");
 		while(true){
-			boolean isFind = false;
-			for (String st : state) {
+			boolean isExist = false;
+			iterator = state.iterator();
+			while(iterator.hasNext()) {
+				String st = iterator.next();
 				Matcher m = p.matcher(st);
-				//見つからなかったら続ける
-				if (!m.find()) {
-					continue;
-				}
-				isFind = true;
-				boolean isRemoved = false;
-				//下に該当するブロックを探す
-				String underKey = m.group(2);
-				for (int i = 0; i < 3; ++i) {
-					for (int j = 0; j < 2; ++j) {
-						if(!underKey.equals(keyPos[i][j])){
-							continue;
-						}
-						//該当するなら一つ上にブロックをセットし、状態を取り除く
-						keyPos[i][j+1] = m.group(1);
-						state.remove(st);
-						isRemoved = true;
-						break;
+				if (m.find()) {
+					isExist = true;
+					String blockId = m.group(1).toLowerCase();
+					String underBlockId = m.group(2).toLowerCase();
+					SetBlock(GenerateLabel("block_"+blockId+".png", -999, -999), blockId);
+					//置けたら取り除く
+					if(pManager.PutBlock(blockId,underBlockId)){
+						iterator.remove();
 					}
 				}
-				//取り除いた後はイテレーターが保障されないから必ずbreak
-				if(isRemoved){
-					break;
-				}
 			}
-			//見つからなくなったら終了
-			if(!isFind){
-				break;
-			}
+			//パターンが無くなったらbreak
+			if(!isExist){break;}
 		}
 
-		//表示の都合上、一番高い列を左に
-		if(keyPos[0][1].equals("") && !keyPos[1][1].equals("")){
-			for (int i = 0; i < 2; ++i) {
-				String tmp = keyPos[0][i];
-				keyPos[0][i] = keyPos[1][i];
-				keyPos[1][i] = tmp;
-			}
-		}
-
-		if (!keyPos[0][0].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[0][0], PosName.left_bottom);
-		}
-		if (!keyPos[0][1].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[0][1], PosName.left_middle);
-		}
-		if (!keyPos[0][2].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[0][2], PosName.left_top);
-		}
-		if (!keyPos[1][0].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[1][0], PosName.center_bottom);
-		}
-		if (!keyPos[1][1].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[1][1], PosName.center_middle);
-		}
-		if (!keyPos[2][0].equals("")) {
-			//TODO ブロックの描画座標を更新
-			//SetBlockPosition(keyPos[2][0], PosName.right_bottom);
-		}
+		pManager.UpdateDisplay();
 	}
 
 	public void SetBlockPosition(String blockId, Position pos) 
