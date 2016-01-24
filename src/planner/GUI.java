@@ -232,8 +232,8 @@ public class GUI extends JFrame {
 		}else{
 			area.setText("移動"+index+"回目\n");
 		}
-		if(ProgressResult.size()>0){
-			area.append(ProgressResult.get(index));
+		if(ProgressResult.size()>0 && index > 0){
+			area.append(ProgressResult.get(index-1) + "\n");
 		}
 		area.append(" --- \n");
 		ArrayList<String> states = progressStates.get(index);

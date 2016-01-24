@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -223,57 +224,38 @@ public class GraphicalPlanner extends JPanel
 
 	public ArrayList<String> getCurrentState() 
 	{
-		ArrayList<String> initialState = new ArrayList<String>();
+		ArrayList<String> state = new ArrayList<String>();
 
-		//		if (positions.get(PosName.left_bottom).GetState() == State.FILL) {
-		//			initialState.add("ontable " + positions.get(PosName.left_bottom).blockId);
-		//		}
-		//
-		//		if (positions.get(PosName.left_middle).GetState() != State.DISABLE) {
-		//			if (positions.get(PosName.left_middle).GetState() == State.FILL) {
-		//				initialState.add(positions.get(PosName.left_middle).blockId + " on "
-		//						+ positions.get(PosName.left_bottom).blockId);
-		//			} else {
-		//				initialState.add("clear " + positions.get(PosName.left_bottom).blockId);
-		//			}
-		//		}
-		//
-		//		if (positions.get(PosName.left_top).GetState() != State.DISABLE) {
-		//			if (positions.get(PosName.left_top).GetState() == State.FILL) {
-		//				initialState.add(
-		//						positions.get(PosName.left_top).blockId + " on " + positions.get(PosName.left_middle).blockId);
-		//				initialState.add("clear " + positions.get(PosName.left_top).blockId);
-		//			} else {
-		//				initialState.add("clear " + positions.get(PosName.left_middle).blockId);
-		//			}
-		//		}
-		//
-		//		if (positions.get(PosName.center_bottom).GetState() == State.FILL) {
-		//			initialState.add("ontable " + positions.get(PosName.center_bottom).blockId);
-		//		}
-		//
-		//		if (positions.get(PosName.center_middle).GetState() != State.DISABLE) {
-		//			if (positions.get(PosName.center_middle).GetState() == State.FILL) {
-		//				initialState.add(positions.get(PosName.center_middle).blockId + " on "
-		//						+ positions.get(PosName.center_bottom).blockId);
-		//				initialState.add("clear " + positions.get(PosName.center_middle).blockId);
-		//			} else {
-		//				initialState.add("clear " + positions.get(PosName.center_bottom).blockId);
-		//			}
-		//		}
-		//
-		//		if (positions.get(PosName.right_bottom).GetState() == State.FILL) {
-		//			initialState.add("ontable " + positions.get(PosName.right_bottom).blockId);
-		//			initialState.add("clear " + positions.get(PosName.right_bottom).blockId);
-		//		}
-		//
-		//		if (positions.get(PosName.arm).GetState() == State.FILL) {
-		//			initialState.add("holding " + positions.get(PosName.arm).blockId);
-		//		} else {
-		//			initialState.add("handEmpty");
-		//		}
+		Iterator<Stack<Position>> listItr = pManager.table.iterator();
+		while (listItr.hasNext()) {
+			Stack<Position> stack = listItr.next();
+			Iterator<Position> stackItr = stack.iterator();
+			String underBlockId = "";
+			while (stackItr.hasNext()) {
+				Position pos = stackItr.next();
+				if(!pos.GetIsEmpty()){
+					if(stack.get(0).equals(pos)){
+						String blockId = pos.GetBlockId().toUpperCase();
+						state.add("ontable " + blockId);
+						underBlockId = pos.GetBlockId().toUpperCase();
+					}else{
+						String blockId = pos.GetBlockId().toUpperCase();
+						state.add(blockId + " on " + underBlockId);
+						underBlockId = blockId;
+					}
+				}else if(stack.peek().equals(pos) && !underBlockId.equals("")){
+					state.add("clear " + underBlockId);
+				}
+			}
+		}
 
-		return initialState;
+		if (!pManager.arm.GetIsEmpty()) {
+			state.add("holding " + pManager.arm.GetBlockId().toUpperCase());
+		} else {
+			state.add("handEmpty");
+		}
+
+		return state;
 	}
 
 	public void SetBlockArrangement(ArrayList<String> state) 
@@ -408,28 +390,6 @@ public class GraphicalPlanner extends JPanel
 		{
 			canDrag = true;
 
-			//			// 上にブロックがある場合は動かせない処理
-			//			po posName = PosName.arm;
-			//			for (PosName pn : PosName.values()) {
-			//				Position pos = positions.get(pn);
-			//				if (pos.state.equals(State.FILL) && pos.blockId.equals(key)) {
-			//					posName = pn;
-			//					break;
-			//				}
-			//			}
-			//			if (posName == PosName.left_bottom && positions.get(PosName.left_middle).GetState() == State.FILL) {
-			//				canDrag = false;
-			//				return;
-			//			}
-			//			if (posName == PosName.left_middle && positions.get(PosName.left_top).GetState() == State.FILL) {
-			//				canDrag = false;
-			//				return;
-			//			}
-			//			if (posName == PosName.center_bottom && positions.get(PosName.center_middle).GetState() == State.FILL) {
-			//				canDrag = false;
-			//				return;
-			//			}
-
 			// 前状態を削除
 			prevPos = pManager.GetPosition(blockId);
 			//prevPos.SetState(State.EMPTY);
@@ -537,6 +497,9 @@ public class GraphicalPlanner extends JPanel
 			if (includes(posX - range, posX + range, x)
 					&& includes(posY - range, posY + range, y)) {
 				AddBlock();
+//				for(String str :getCurrentState()){
+//					System.out.println(str);
+//				}
 			}
 		}
 	}
