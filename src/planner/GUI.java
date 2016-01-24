@@ -1,7 +1,6 @@
 package planner;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.event.ActionEvent;
@@ -14,11 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-<<<<<<< HEAD
 import java.io.PrintWriter;
-=======
-import java.lang.ProcessBuilder.Redirect;
->>>>>>> origin/master
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -30,11 +25,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-<<<<<<< HEAD
 import javax.swing.JTextField;
-=======
-import javax.swing.OverlayLayout;
->>>>>>> origin/master
 import javax.swing.border.EmptyBorder;
 
 public class GUI extends JFrame {
@@ -46,16 +37,14 @@ public class GUI extends JFrame {
 	ArrayList<ArrayList<String>> progressStates;
 	ArrayList<String> ProgressResult;
 	final JTextArea area;
-<<<<<<< HEAD
-	final JTextField text;
-=======
+
 	private JLabel[] runLabels;
 	JLabel lblCount;
 	JLabel frame;
 	JPanel uiPane;
 	JLayeredPane layerPane;
 
->>>>>>> origin/master
+
 	public static void main(String[] args)
 	{
 		GUI frame = new GUI();
@@ -80,31 +69,22 @@ public class GUI extends JFrame {
 	{
 		setTitle("Planner");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-<<<<<<< HEAD
-		setBounds(100, 100, 1250, 800);
 
-=======
 		//ウィンドウのタイトルバーと枠を考慮
 		getContentPane().setPreferredSize(
 				new Dimension(960,540));
 		pack();
 		//setBounds(100, 100, 1024, 768);
 		
->>>>>>> origin/master
+
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//contentPane.setBackground(Color.gray);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 
-<<<<<<< HEAD
-		ImageIcon icon2 = new ImageIcon("./img/hukidasi.png");
-		JLabel label2 = new JLabel(icon2);
-		label2.setBounds(-30, -50, 1350, 660);
-		contentPane.add(label2);
-=======
+
 		float graphical_scale = 0.3f;
->>>>>>> origin/master
 
 		//背景ポーン
 		JPanel backPane = new JPanel();
@@ -144,24 +124,13 @@ public class GUI extends JFrame {
 		//完了配置
 		JLabel lblFinish = new JLabel("Finish");
 		lblFinish.setBounds(800, 400,100, 25);
-<<<<<<< HEAD
-		contentPane.add(lblFinish);
 
-		goalArrange = new GraphicalPlanner(graphical_scale);
-		goalArrange.setBounds(800, 420, goalArrange.getWidth(),goalArrange.getHeight());
-		contentPane.add(goalArrange);
-
-
-		progressArrange = new GraphicalPlanner(graphical_scale);
-		progressArrange.setBounds(475, 120, progressArrange.getWidth(),progressArrange.getHeight());
-		label2.add(progressArrange);
-=======
 		graphicalSettingPane.add(lblFinish);
 
 		goalArrange = new GraphicalPlanner(graphical_scale,true);
 		goalArrange.setBounds(576, 0, goalArrange.getWidth(),goalArrange.getHeight());
 		graphicalSettingPane.add(goalArrange);
->>>>>>> origin/master
+
 
 		//実行ボタン
 		runLabels = new JLabel[2];
@@ -195,21 +164,7 @@ public class GUI extends JFrame {
 
 		//スクロール表示
 		JScrollPane scrollPane_2 = new JScrollPane();
-<<<<<<< HEAD
-		scrollPane_2.setBounds(1000, 50, 170, 179);
-		contentPane.add(scrollPane_2);
 
-		area = new JTextArea();
-		scrollPane_2.setViewportView(area);
-
-		JLabel lblProcess = new JLabel("Process");
-		lblProcess.setBounds(1000, 30, 61, 15);
-		contentPane.add(lblProcess);
-
-		final JLabel lblCount = new JLabel("実行前");
-		lblCount.setBounds(1100, 30, 61, 15);
-		contentPane.add(lblCount);
-=======
 		scrollPane_2.setBounds(10, 25, 180, 180);
 		uiProgressPane.add(scrollPane_2);
 		area = new JTextArea();
@@ -245,22 +200,20 @@ public class GUI extends JFrame {
 
 
 
->>>>>>> origin/master
+
 
 		final JLabel label = new JLabel();
 
 		JPanel labelPanel = new JPanel();
 		labelPanel.add(label);
 
-		JLabel lblCreate = new JLabel("File name");
-		lblFinish.setBounds(100, 250,160, 50);
-		contentPane.add(lblCreate);
+		
 
-		text = new JTextField(10);
-		text.setBounds(100,250,160,50);
+		final JTextField text = new JTextField(10);
+		text.setBounds(60,130,120,30);
 		contentPane.add(text);
 		JButton btnFcreate = new JButton("file create");
-		btnFcreate.setBounds(100,300,160,50);
+		btnFcreate.setBounds(60,180,120,30);
 		btnFcreate.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -274,11 +227,9 @@ public class GUI extends JFrame {
 					}});
 		contentPane.add(btnFcreate);
 		JButton btnfile = new JButton("file open");
-<<<<<<< HEAD
-		btnfile.setBounds(100,50,160,50);
-=======
-		btnfile.setBounds(60,70,160,50);
->>>>>>> origin/master
+
+		btnfile.setBounds(60,30,120,30);
+
 		btnfile.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -336,11 +287,9 @@ public class GUI extends JFrame {
 		contentPane.add(labelPanel);
 
 		JButton btnsave = new JButton("file save");
-<<<<<<< HEAD
-		btnsave.setBounds(100,150,160,50);
-=======
-		btnsave.setBounds(60,120,160,50);
->>>>>>> origin/master
+
+		btnsave.setBounds(60,80,120,30);
+
 		btnsave.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -376,7 +325,6 @@ public class GUI extends JFrame {
 						}}
 				});
 		contentPane.add(btnsave);
-<<<<<<< HEAD
 		ImageIcon icon1 = new ImageIcon("./img/ya.png");
 		JLabel label1 = new JLabel(icon1);
 		label1.setBounds(500, 450, 260, 250);
@@ -407,27 +355,7 @@ public class GUI extends JFrame {
 		contentPane.add(label1);
 
 
-		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(1000, 234, 80, 25);
-		btnBack.addActionListener(
-				new ActionListener(){
-					public void actionPerformed(ActionEvent e){
-						index = Math.max(--index,0);
-						DisplayState();
-					}
-				});
-		contentPane.add(btnBack);
-		JButton btnGo = new JButton("Go");
-		btnGo.setBounds(1090, 234, 80, 25);
-		btnGo.addActionListener(
-				new ActionListener(){
-					public void actionPerformed(ActionEvent e){
-						index = Math.min(++index,progressStates.size()-1);
-						DisplayState();
-					}
-				});
-		contentPane.add(btnGo);
-=======
+
 
 		//		ImageIcon icon1 = new ImageIcon("./img/ya.png");
 		//		JLabel label1 = new JLabel(icon1);
@@ -457,7 +385,7 @@ public class GUI extends JFrame {
 		//		});
 		//
 		//		contentPane.add(label1);
->>>>>>> origin/master
+
 	}
 	private void DisplayState() 
 	{
