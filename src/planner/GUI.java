@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,7 +36,7 @@ public class GUI extends JFrame {
 	ArrayList<ArrayList<String>> progressStates;
 	ArrayList<String> ProgressResult;
 	final JTextArea area;
-
+	final ArrayList<String> list2 = new ArrayList<String>();
 	private JLabel[] runLabels;
 	JLabel lblCount;
 	JLabel frame;
@@ -265,26 +266,6 @@ public class GUI extends JFrame {
 							    }catch(IOException er){
 							      System.out.println(er);
 							    }
-							/*try{
-								ArrayList<String> list = new ArrayList<String>();
-								FileReader filereader = new FileReader(file);
-								int ch;
-								area.setText("");
-								while((ch = filereader.read()) != -1){
-									area.append(String.valueOf((char)ch));
-									list.add(String.valueOf((char)ch));
-
-								}
-
-								System.out.println(list);
-								startArrange.SetBlockArrangement(new ArrayList<String>(list));
-								goalArrange.SetBlockArrangement(new ArrayList<String>(list));
-								filereader.close();
-							}catch(FileNotFoundException error){
-								System.out.println(error);
-							}catch(IOException error){
-								System.out.println(error);
-							}*/
 
 
 					}
@@ -329,6 +310,20 @@ public class GUI extends JFrame {
 						}
 				});
 		contentPane.add(btnsave);
+
+		JButton btnRandom = new JButton("random");
+		btnRandom.setBounds(60,10,150,50);
+		btnRandom.addActionListener(
+				new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					Random();
+					startArrange.SetBlockArrangement(new ArrayList<String>(list2));
+					Random();
+					goalArrange.SetBlockArrangement(new ArrayList<String>(list2));
+
+					}
+				});
+		contentPane.add(btnRandom);
 		ImageIcon icon1 = new ImageIcon("./img/ya.png");
 		JLabel label1 = new JLabel(icon1);
 		label1.setBounds(500, 450, 260, 250);
@@ -405,13 +400,12 @@ public class GUI extends JFrame {
 		}
 		area.append(" --- \n");
 		ArrayList<String> states = progressStates.get(index);
-		System.out.println(states);
 		for(String str : states){
 			area.append(str + "\n");
 		}
 		progressArrange.SetBlockArrangement(new ArrayList<String>(states));
-//		uiPane.add(frame,0);
-//		uiPane.repaint();
+		uiPane.add(frame,0);
+		uiPane.repaint();
 	}
 	private class myListener extends MouseAdapter{
 		//ドラッグ開始時の処理
@@ -459,5 +453,334 @@ public class GUI extends JFrame {
 	    return false;
 	  }
 
+	public void Random(){
+		ArrayList<String> list = new ArrayList<String>();
+		list.clear();
+		list2.clear();
+		list.add("ontable A");
+		list.add("ontable B");
+		list.add("ontable C");
+		Collections.shuffle(list);
+		String first = list.get(0);
+		list2.add(first);
+		if(first.equals("ontable A")){
+			list.clear();
+			list.add("clear A");
+			list.add("B on A");
+			list.add("C on A");
+			Collections.shuffle(list);
+			list2.add(list.get(0));
+			if((list.get(0)).equals("clear A")){
+				list.clear();
+				list.add("ontable B");
+				list.add("ontable C");
+				Collections.shuffle(list);
+				list2.add((list.get(0)));
+				if((list.get(0)).equals("ontable B")){
+					list.clear();
+					list.add("C on B");
+					list.add("clear B");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear B")){
+						list.clear();
+						list.add("ontable C");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable C")){
+							list2.add("clear C");
+							list2.add("handEmpty");
 
+						}
+					}
+					else if((list.get(0)).equals("C on B")){
+						list2.add("clear C");
+						list2.add("handEmpty");
+					}
+				}
+				else if((list.get(0)).equals("ontable C")){
+					list.clear();
+					list.add("B on C");
+					list.add("clear C");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear C")){
+						list.clear();
+						list.add("ontable B");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable B")){
+							list2.add("clear B");
+							list2.add("handEmpty");
+						}
+					}
+					else if((list.get(0)).equals("B on C")){
+						list2.add("clear B");
+						list2.add("handEmpty");
+					}
+				}
+			}
+			else if((list.get(0)).equals("B on A")){
+				list.clear();
+				list.add("clear B");
+				list.add("C on B");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear B")){
+					list.clear();
+					list.add("ontable C");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable C")){
+						list2.add("clear C");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("C on B")){
+					list2.add("clear C");
+					list2.add("handEmpty");
+				}
+			}
+			else if((list.get(0)).equals("C on A")){
+				list.clear();
+				list.add("clear C");
+				list.add("B on C");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear C")){
+					list.clear();
+					list.add("ontable B");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable B")){
+						list2.add("clear B");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("B on C")){
+					list2.add("clear B");
+					list2.add("handEmpty");
+				}
+			}
+
+			}
+		else if(first.equals("ontable B")){
+			list.clear();
+			list.add("clear B");
+			list.add("C on B");
+			list.add("A on B");
+			Collections.shuffle(list);
+			list2.add(list.get(0));
+			if((list.get(0)).equals("clear B")){
+				list.clear();
+				list.add("ontable C");
+				list.add("ontable A");
+				Collections.shuffle(list);
+				list2.add((list.get(0)));
+				if((list.get(0)).equals("ontable C")){
+					list.clear();
+					list.add("A on C");
+					list.add("clear C");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear C")){
+						list.clear();
+						list.add("ontable A");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable A")){
+							list2.add("clear A");
+							list2.add("handEmpty");
+						}
+					}
+					else if((list.get(0)).equals("A on C")){
+						list2.add("clear A");
+						list2.add("handEmpty");
+					}
+				}
+				else if((list.get(0)).equals("ontable A")){
+					list.clear();
+					list.add("C on A");
+					list.add("clear A");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear A")){
+						list.clear();
+						list.add("ontable C");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable C")){
+							list2.add("clear C");
+							list2.add("handEmpty");
+						}
+					}
+					else if((list.get(0)).equals("C on A")){
+						list2.add("clear C");
+						list2.add("handEmpty");
+					}
+				}
+			}
+			else if((list.get(0)).equals("C on B")){
+				list.clear();
+				list.add("clear C");
+				list.add("A on C");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear C")){
+					list.clear();
+					list.add("ontable A");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable A")){
+						list2.add("clear A");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("A on C")){
+					list2.add("clear A");
+					list2.add("handEmpty");
+				}
+			}
+			else if((list.get(0)).equals("A on B")){
+				list.clear();
+				list.add("clear A");
+				list.add("C on A");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear A")){
+					list.clear();
+					list.add("ontable C");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable C")){
+						list2.add("clear C");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("C on A")){
+					list2.add("clear C");
+					list2.add("handEmpty");
+				}
+			}
+
+			}//unnza
+		else if(first.equals("ontable C")){
+			list.clear();
+			list.add("clear C");
+			list.add("A on C");
+			list.add("B on C");
+			Collections.shuffle(list);
+			list2.add(list.get(0));
+			if((list.get(0)).equals("clear C")){
+				list.clear();
+				list.add("ontable A");
+				list.add("ontable B");
+				Collections.shuffle(list);
+				list2.add((list.get(0)));
+				if((list.get(0)).equals("ontable A")){
+					list.clear();
+					list.add("B on A");
+					list.add("clear A");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear A")){
+						list.clear();
+						list.add("ontable B");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable B")){
+							list2.add("clear B");
+							list2.add("handEmpty");
+						}
+					}
+					else if((list.get(0)).equals("B on A")){
+						list2.add("clear B");
+						list2.add("handEmpty");
+					}
+				}
+				else if((list.get(0)).equals("ontable B")){
+					list.clear();
+					list.add("A on B");
+					list.add("clear B");
+					Collections.shuffle(list);
+					list2.add((list.get(0)));
+					if((list.get(0)).equals("clear B")){
+						list.clear();
+						list.add("ontable A");
+						list.add("handEmpty");
+						Collections.shuffle(list);
+						list2.add((list.get(0)));
+						if((list.get(0)).equals("ontable A")){
+							list2.add("clear A");
+							list2.add("handEmpty");
+						}
+					}
+					else if((list.get(0)).equals("A on B")){
+						list2.add("clear A");
+						list2.add("handEmpty");
+					}
+				}
+			}
+			else if((list.get(0)).equals("A on C")){
+				list.clear();
+				list.add("clear A");
+				list.add("B on A");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear A")){
+					list.clear();
+					list.add("ontable B");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable B")){
+						list2.add("clear B");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("B on A")){
+					list2.add("clear B");
+					list2.add("handEmpty");
+				}
+			}
+			else if((list.get(0)).equals("B on C")){
+				list.clear();
+				list.add("clear B");
+				list.add("A on B");
+				Collections.shuffle(list);
+				list2.add(list.get(0));
+				if(list.get(0).equals("clear B")){
+					list.clear();
+					list.add("ontable A");
+					list.add("handEmpty");
+					Collections.shuffle(list);
+					list2.add(list.get(0));
+					if((list.get(0)).equals("ontable A")){
+						list2.add("clear A");
+						list2.add("handEmpty");
+					}
+
+				}
+				else if(list.get(0).equals("A on B")){
+					list2.add("clear A");
+					list2.add("handEmpty");
+				}
+			}
+
+			}
+	}
 }
