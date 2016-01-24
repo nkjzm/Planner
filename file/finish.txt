@@ -1,0 +1,5 @@
+ontable A
+B on A
+C on B
+clear C
+handEmpty

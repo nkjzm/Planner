@@ -1,0 +1,7 @@
+ontable A
+clear A
+ontable B
+clear B
+ontable C
+clear C
+handEmpty

@@ -18,14 +18,12 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 public class GUI extends JFrame {
@@ -51,7 +49,7 @@ public class GUI extends JFrame {
 		frame.setVisible(true);
 	}
 
-	public JLabel GenerateLabel(String imgName, int x, int y) 
+	public JLabel GenerateLabel(String imgName, int x, int y)
 	{
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
 		MediaTracker tracker = new MediaTracker(this);
@@ -75,7 +73,7 @@ public class GUI extends JFrame {
 				new Dimension(960,540));
 		pack();
 		//setBounds(100, 100, 1024, 768);
-		
+
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -207,9 +205,9 @@ public class GUI extends JFrame {
 		JPanel labelPanel = new JPanel();
 		labelPanel.add(label);
 
-		
 
-		final JTextField text = new JTextField(10);
+
+		/*final JTextField text = new JTextField(10);
 		text.setBounds(60,130,120,30);
 		contentPane.add(text);
 		JButton btnFcreate = new JButton("file create");
@@ -225,31 +223,39 @@ public class GUI extends JFrame {
 							}
 
 					}});
-		contentPane.add(btnFcreate);
-		JButton btnfile = new JButton("file open");
+		contentPane.add(btnFcreate);*/
+		JButton btnfile = new JButton("data open");
 
-		btnfile.setBounds(60,30,120,30);
+		btnfile.setBounds(60,70,150,50);
 
 		btnfile.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						JFileChooser filechooser = new JFileChooser();
-						int selected = filechooser.showOpenDialog(label);
-						if (selected == JFileChooser.APPROVE_OPTION){
-							final File file = filechooser.getSelectedFile();
+						//JFileChooser filechooser = new JFileChooser();
+						//int selected = filechooser.showOpenDialog(label);
+						//if (selected == JFileChooser.APPROVE_OPTION){
+							//final File file = filechooser.getSelectedFile();
+						 File file = new File("./file/start.txt");
+						 File file2 = new File("./file/finish.txt");
 							try{
 								FileReader filereader = new FileReader(file);
+								FileReader filereader2 = new FileReader(file2);
 								ArrayList<String> list = new ArrayList<String>();
-							      if (checkBeforeReadfile(file)){
+								ArrayList<String> list2 = new ArrayList<String>();
+							      if (checkBeforeReadfile(file)&&checkBeforeReadfile(file2)){
 							        BufferedReader br = new BufferedReader(new FileReader(file));
-
-							        String str;
+							        BufferedReader br2 = new BufferedReader(new FileReader(file2));
+							        String str,str2;
 							        while((str = br.readLine()) != null){
 							          list.add(str);
 							        }
+							        while((str2 = br2.readLine()) != null){
+								          list2.add(str2);
+								        }
 							        startArrange.SetBlockArrangement(new ArrayList<String>(list));
-									goalArrange.SetBlockArrangement(new ArrayList<String>(list));
+									goalArrange.SetBlockArrangement(new ArrayList<String>(list2));
 							        br.close();
+							        br2.close();
 							        filereader.close();
 							      }else{
 							        System.out.println("ファイルが見つからないか開けません");
@@ -280,49 +286,47 @@ public class GUI extends JFrame {
 								System.out.println(error);
 							}*/
 
-						}
+
 					}
 				});
 		contentPane.add(btnfile);
 		contentPane.add(labelPanel);
 
-		JButton btnsave = new JButton("file save");
+		JButton btnsave = new JButton("data save");
 
-		btnsave.setBounds(60,80,120,30);
+		btnsave.setBounds(60,150,150,50);
 
 		btnsave.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
-						JFileChooser filechooser = new JFileChooser();
-						int selected = filechooser.showSaveDialog(label);
-						if (selected == JFileChooser.APPROVE_OPTION){
-							final File file = filechooser.getSelectedFile();
+						//JFileChooser filechooser = new JFileChooser();
+						//int selected = filechooser.showSaveDialog(label);
+						//if (selected == JFileChooser.APPROVE_OPTION){
+							//final File file = filechooser.getSelectedFile();
+							 File file = new File("./file/start.txt");
+							 File file2 = new File("./file/finish.txt");
 							try{
 
-								if (checkBeforeWritefile(file)){
+								if (checkBeforeWritefile(file)&&checkBeforeWritefile(file2)){
 									PrintWriter filewriter = new PrintWriter(file);
-									/*for(int i=0;progressStates.size()>i;i++){
-										ArrayList<String> states = progressStates.get(i);
-
-										for(String str : states){
-											filewriter.write(str + "\r\n");}
-									}*/
+									PrintWriter filewriter2 = new PrintWriter(file2);
 									ArrayList<String> str2 = progressStates.get(0);
 									//filewriter.write("初期状態"+"\r\n");
 									for(String str3 : str2)
 									filewriter.print(str3+"\r\n");
-									/*filewriter.write("終了状態"+"\r\n");
+									//filewriter.write("終了状態"+"\r\n");
 									ArrayList<String> str4 = progressStates.get(progressStates.size() - 1);
 									for(String str5 : str4)
-									filewriter.write(str5+"\r\n");*/
+									filewriter2.write(str5+"\r\n");
 									filewriter.close();
+									filewriter2.close();
 								}else{
 									System.out.println("ファイルに書き込めません");
 								}
 							}catch(IOException error){
 								System.out.println(error);
 							}
-						}}
+						}
 				});
 		contentPane.add(btnsave);
 		ImageIcon icon1 = new ImageIcon("./img/ya.png");
@@ -387,7 +391,7 @@ public class GUI extends JFrame {
 		//		contentPane.add(label1);
 
 	}
-	private void DisplayState() 
+	private void DisplayState()
 	{
 		if(index == 0){
 			area.setText("初期状態\n");
@@ -411,13 +415,13 @@ public class GUI extends JFrame {
 	}
 	private class myListener extends MouseAdapter{
 		//ドラッグ開始時の処理
-		public void mousePressed(MouseEvent e) 
+		public void mousePressed(MouseEvent e)
 		{
 			runLabels[0].setVisible(false);
 			runLabels[1].setVisible(true);
 		}
 		//ドラッグ終了時の処理
-		public void mouseReleased(MouseEvent e) 
+		public void mouseReleased(MouseEvent e)
 		{
 			runLabels[0].setVisible(true);
 			runLabels[1].setVisible(false);
