@@ -26,6 +26,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.OverlayLayout;
 import javax.swing.border.EmptyBorder;
 
 public class GUI extends JFrame {
@@ -72,10 +73,10 @@ public class GUI extends JFrame {
 				new Dimension(960,540));
 		pack();
 		//setBounds(100, 100, 1024, 768);
-
+		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setBackground(Color.gray);
+		//contentPane.setBackground(Color.gray);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 
@@ -86,13 +87,19 @@ public class GUI extends JFrame {
 		backPane.setBounds(0, 0, 960, 540);
 		backPane.setOpaque(false);
 		backPane.setLayout(null);
-		contentPane.add(backPane);
+		contentPane.add(backPane,0);
 
 		//配置設定ポーン
 		JPanel graphicalSettingPane = new JPanel();
 		graphicalSettingPane.setBounds(0, 252, 960, 288);
 		graphicalSettingPane.setLayout(null);
-		contentPane.add(graphicalSettingPane);
+		contentPane.add(graphicalSettingPane,0);
+		//黒帯
+		JPanel black = new JPanel();
+		black.setBounds(0, 525, 960, 15);
+		black.setBackground(Color.black);
+		black.setLayout(null);
+		contentPane.add(black,0);
 
 		//UIポーン
 		uiPane = new JPanel();
@@ -106,7 +113,7 @@ public class GUI extends JFrame {
 		lblStart.setBounds(50, 400, 100, 25);
 		graphicalSettingPane.add(lblStart);
 
-		startArrange = new GraphicalPlanner(graphical_scale);
+		startArrange = new GraphicalPlanner(graphical_scale,true);
 		startArrange.setBounds(0, 0, startArrange.getWidth(),startArrange.getHeight());
 		graphicalSettingPane.add(startArrange);
 
@@ -115,7 +122,7 @@ public class GUI extends JFrame {
 		lblFinish.setBounds(800, 400,100, 25);
 		graphicalSettingPane.add(lblFinish);
 
-		goalArrange = new GraphicalPlanner(graphical_scale);
+		goalArrange = new GraphicalPlanner(graphical_scale,true);
 		goalArrange.setBounds(576, 0, goalArrange.getWidth(),goalArrange.getHeight());
 		graphicalSettingPane.add(goalArrange);
 
@@ -130,11 +137,11 @@ public class GUI extends JFrame {
 		runLabels[1].setOpaque(false);
 
 		//途中配置
-		progressArrange = new GraphicalPlanner(0.25f);
-		progressArrange.setBounds(300, 50, progressArrange.getWidth(),progressArrange.getHeight());
-		backPane.add(progressArrange);
+		progressArrange = new GraphicalPlanner(0.25f,false);
+		progressArrange.setBounds(345, 30, progressArrange.getWidth(),progressArrange.getHeight());
+		uiPane.add(progressArrange);
 
-		frame = GenerateLabel("frame.png", 590, 50);
+		frame = GenerateLabel("frame.png", 590, 10);
 		uiPane.add(frame);
 
 		//		JLabel lblProcess = new JLabel("Process");
@@ -143,7 +150,7 @@ public class GUI extends JFrame {
 
 		//途中経過テキストポーン
 		JPanel uiProgressPane = new JPanel();
-		uiProgressPane.setBounds(700, 10, 200, 232);
+		uiProgressPane.setBounds(650, 10, 200, 232);
 		//		uiProgressPane.setOpaque(false);
 		uiProgressPane.setBackground(Color.white);
 		uiProgressPane.setLayout(null);
@@ -193,7 +200,7 @@ public class GUI extends JFrame {
 		labelPanel.add(label);
 
 		JButton btnfile = new JButton("file open");
-		btnfile.setBounds(100,100,160,50);
+		btnfile.setBounds(60,70,160,50);
 		btnfile.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -227,7 +234,7 @@ public class GUI extends JFrame {
 		contentPane.add(labelPanel);
 
 		JButton btnsave = new JButton("file save");
-		btnsave.setBounds(100,200,160,50);
+		btnsave.setBounds(60,120,160,50);
 		btnsave.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -303,8 +310,8 @@ public class GUI extends JFrame {
 			area.append(str + "\n");
 		}
 		progressArrange.SetBlockArrangement(new ArrayList<String>(states));
-		uiPane.add(frame,0);
-		uiPane.repaint();
+//		uiPane.add(frame,0);
+//		uiPane.repaint();
 	}
 	private class myListener extends MouseAdapter{
 		//ドラッグ開始時の処理

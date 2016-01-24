@@ -26,7 +26,7 @@ public class PositionManager
 		// 座標と同時に点線パネルとブロックの描画も更新する
 		public void SetPosition(int _x,int _y) 
 		{
-			x = _x;
+			x = _x + gPlanner.offsetX;
 			y = _y;
 			emplyLabel.setLocation(
 					(int) (x * gPlanner.scale),

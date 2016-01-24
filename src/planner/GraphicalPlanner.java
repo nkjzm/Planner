@@ -33,6 +33,8 @@ public class GraphicalPlanner extends JPanel
 {
 	public float scale;
 	public float blockScale;
+	public int offsetX;
+
 	public JPanel bgPanel;
 	public JPanel blankPanel;
 	public JPanel blockPanel;
@@ -44,7 +46,7 @@ public class GraphicalPlanner extends JPanel
 
 	public static void main(String args[]) 
 	{
-		GraphicalPlanner aaa = new GraphicalPlanner(0.5f);
+		GraphicalPlanner aaa = new GraphicalPlanner(0.6f,true);
 		JFrame jframe = new JFrame("DrawRect");
 		jframe.setVisible(true);
 		Container c = jframe.getContentPane();
@@ -67,12 +69,18 @@ public class GraphicalPlanner extends JPanel
 	HashMap<String, JLabel> blocks = new HashMap<String, JLabel>();
 	private PositionManager pManager;
 
-	GraphicalPlanner(float scale) 
+	public GraphicalPlanner(float scale,boolean isFull) 
 	{
+		offsetX = -180;
+		int offsetY = -180;
+		if(isFull){
+			offsetX = offsetY = 0;
+		}
+		
 		this.scale = scale;
 		blockScale = scale;
 		this.setLayout(null);
-		setBounds(0, 0, (int) (1280 * scale), (int) (960 * scale));
+		setBounds(0, 0, (int) (1280 * scale) + (int)(offsetX*2*scale), (int) (960 * scale) + (int)(offsetY*scale));
 
 		this.setLayout(new OverlayLayout(this));
 
@@ -89,17 +97,18 @@ public class GraphicalPlanner extends JPanel
 		}
 
 		//背景
-		JLabel bg = GenerateLabel("bg.png", 0, 710);
+		JLabel bg = GenerateLabel("bg.png", 0+offsetX, 710);
 		bgPanel.add(bg);
 
 		//アーム
-		arm = GenerateLabel("arm.png", 800, 0);
+		arm = GenerateLabel("arm.png", 800+offsetX, 0);
 		bgPanel.add(arm);
 
 		//ゴミ箱
 		dustboxLabels = new JLabel[2];
 		for(int i=0;i<2;++i){
-			dustboxLabels[i] = GenerateLabel("dustbox_"+i+".png", i==0?22:12, i==0?718:628);
+			dustboxLabels[i] = 
+					GenerateLabel("dustbox_"+i+".png", (i==0?22:12) + offsetX, i==0?718:628);
 			bgPanel.add(dustboxLabels[i]);
 		}
 		dustboxLabels[1].setVisible(false);
@@ -107,7 +116,7 @@ public class GraphicalPlanner extends JPanel
 		//追加ボタン
 		addLabels = new JLabel[2];
 		for(int i=0;i<2;++i){
-			addLabels[i] = GenerateLabel("add_"+i+".png", 1121, 780);
+			addLabels[i] = GenerateLabel("add_"+i+".png", 1121 + offsetX, 780);
 			bgPanel.add(addLabels[i]);
 		}
 		AddMouseListener listener = new AddMouseListener();
@@ -199,7 +208,7 @@ public class GraphicalPlanner extends JPanel
 			blankPanel.add(position.emplyLabel);
 		}
 		bgPanel.remove(arm);
-		arm = GenerateLabel("arm.png", 800, 0);
+		arm = GenerateLabel("arm.png", 800 + offsetX, 0);
 		bgPanel.add(arm);
 	}
 
