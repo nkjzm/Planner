@@ -6,11 +6,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -21,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 public class GUI extends JFrame {
@@ -32,7 +34,7 @@ public class GUI extends JFrame {
 	ArrayList<ArrayList<String>> progressStates;
 	ArrayList<String> ProgressResult;
 	final JTextArea area;
-
+	final JTextField text;
 	public static void main(String[] args)
 	{
 		EventQueue.invokeLater(new Runnable() {
@@ -51,7 +53,7 @@ public class GUI extends JFrame {
 	{
 		setTitle("Planner");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1400, 800);
+		setBounds(100, 100, 1250, 800);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -61,7 +63,7 @@ public class GUI extends JFrame {
 
 		ImageIcon icon2 = new ImageIcon("./img/hukidasi.png");
 		JLabel label2 = new JLabel(icon2);
-		label2.setBounds(0, -100, 1350, 660);
+		label2.setBounds(-30, -50, 1350, 660);
 		contentPane.add(label2);
 
 		JLabel lblStart = new JLabel("Start");
@@ -82,27 +84,24 @@ public class GUI extends JFrame {
 		goalArrange.setBounds(800, 420, goalArrange.getWidth(),goalArrange.getHeight());
 		contentPane.add(goalArrange);
 
-		JLabel lblProgress = new JLabel("Progress");
-		lblProgress.setBounds(425,30,100,25);
-		contentPane.add(lblProgress);
 
 		progressArrange = new GraphicalPlanner(graphical_scale);
-		progressArrange.setBounds(400, 130, progressArrange.getWidth(),progressArrange.getHeight());
+		progressArrange.setBounds(475, 120, progressArrange.getWidth(),progressArrange.getHeight());
 		label2.add(progressArrange);
 
 		JScrollPane scrollPane_2 = new JScrollPane();
-		scrollPane_2.setBounds(1100, 50, 170, 179);
+		scrollPane_2.setBounds(1000, 50, 170, 179);
 		contentPane.add(scrollPane_2);
 
 		area = new JTextArea();
 		scrollPane_2.setViewportView(area);
 
 		JLabel lblProcess = new JLabel("Process");
-		lblProcess.setBounds(1100, 30, 61, 15);
+		lblProcess.setBounds(1000, 30, 61, 15);
 		contentPane.add(lblProcess);
 
 		final JLabel lblCount = new JLabel("実行前");
-		lblCount.setBounds(1200, 30, 61, 15);
+		lblCount.setBounds(1100, 30, 61, 15);
 		contentPane.add(lblCount);
 
 		final JLabel label = new JLabel();
@@ -110,33 +109,78 @@ public class GUI extends JFrame {
 		JPanel labelPanel = new JPanel();
 		labelPanel.add(label);
 
+		JLabel lblCreate = new JLabel("File name");
+		lblFinish.setBounds(100, 250,160, 50);
+		contentPane.add(lblCreate);
+
+		text = new JTextField(10);
+		text.setBounds(100,250,160,50);
+		contentPane.add(text);
+		JButton btnFcreate = new JButton("file create");
+		btnFcreate.setBounds(100,300,160,50);
+		btnFcreate.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						try{
+							File fl = new File("./file/"+text.getText()+".txt");
+							  fl.createNewFile();
+							}catch(IOException er){
+							  System.out.println("例外が発生しました");
+							}
+
+					}});
+		contentPane.add(btnFcreate);
 		JButton btnfile = new JButton("file open");
-		btnfile.setBounds(100,100,160,50);
+		btnfile.setBounds(100,50,160,50);
 		btnfile.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
 						JFileChooser filechooser = new JFileChooser();
-
 						int selected = filechooser.showOpenDialog(label);
 						if (selected == JFileChooser.APPROVE_OPTION){
 							final File file = filechooser.getSelectedFile();
-
 							try{
-
 								FileReader filereader = new FileReader(file);
+								ArrayList<String> list = new ArrayList<String>();
+							      if (checkBeforeReadfile(file)){
+							        BufferedReader br = new BufferedReader(new FileReader(file));
 
+							        String str;
+							        while((str = br.readLine()) != null){
+							          list.add(str);
+							        }
+							        startArrange.SetBlockArrangement(new ArrayList<String>(list));
+									goalArrange.SetBlockArrangement(new ArrayList<String>(list));
+							        br.close();
+							        filereader.close();
+							      }else{
+							        System.out.println("ファイルが見つからないか開けません");
+							      }
+							    }catch(FileNotFoundException err){
+							      System.out.println(err);
+							    }catch(IOException er){
+							      System.out.println(er);
+							    }
+							/*try{
+								ArrayList<String> list = new ArrayList<String>();
+								FileReader filereader = new FileReader(file);
 								int ch;
 								area.setText("");
 								while((ch = filereader.read()) != -1){
 									area.append(String.valueOf((char)ch));
+									list.add(String.valueOf((char)ch));
+
 								}
 
+								System.out.println(list);
+								startArrange.SetBlockArrangement(new ArrayList<String>(list));
+								goalArrange.SetBlockArrangement(new ArrayList<String>(list));
 								filereader.close();
 							}catch(FileNotFoundException error){
 								System.out.println(error);
 							}catch(IOException error){
 								System.out.println(error);
-							}
+							}*/
 
 						}
 					}
@@ -145,7 +189,7 @@ public class GUI extends JFrame {
 		contentPane.add(labelPanel);
 
 		JButton btnsave = new JButton("file save");
-		btnsave.setBounds(100,200,160,50);
+		btnsave.setBounds(100,150,160,50);
 		btnsave.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -156,13 +200,21 @@ public class GUI extends JFrame {
 							try{
 
 								if (checkBeforeWritefile(file)){
-									FileWriter filewriter = new FileWriter(file);
-									for(int i=0;progressStates.size()>i;i++){
+									PrintWriter filewriter = new PrintWriter(file);
+									/*for(int i=0;progressStates.size()>i;i++){
 										ArrayList<String> states = progressStates.get(i);
 
 										for(String str : states){
 											filewriter.write(str + "\r\n");}
-									}
+									}*/
+									ArrayList<String> str2 = progressStates.get(0);
+									//filewriter.write("初期状態"+"\r\n");
+									for(String str3 : str2)
+									filewriter.print(str3+"\r\n");
+									/*filewriter.write("終了状態"+"\r\n");
+									ArrayList<String> str4 = progressStates.get(progressStates.size() - 1);
+									for(String str5 : str4)
+									filewriter.write(str5+"\r\n");*/
 									filewriter.close();
 								}else{
 									System.out.println("ファイルに書き込めません");
@@ -175,7 +227,7 @@ public class GUI extends JFrame {
 		contentPane.add(btnsave);
 		ImageIcon icon1 = new ImageIcon("./img/ya.png");
 		JLabel label1 = new JLabel(icon1);
-		label1.setBounds(570, 450, 250, 250);
+		label1.setBounds(500, 450, 260, 250);
 		label1.addMouseListener(new MouseListener()
 		{
 			public void mouseClicked(MouseEvent arg0) {
@@ -204,7 +256,7 @@ public class GUI extends JFrame {
 
 
 		JButton btnBack = new JButton("Back");
-		btnBack.setBounds(1100, 234, 80, 25);
+		btnBack.setBounds(1000, 234, 80, 25);
 		btnBack.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -214,7 +266,7 @@ public class GUI extends JFrame {
 				});
 		contentPane.add(btnBack);
 		JButton btnGo = new JButton("Go");
-		btnGo.setBounds(1200, 234, 80, 25);
+		btnGo.setBounds(1090, 234, 80, 25);
 		btnGo.addActionListener(
 				new ActionListener(){
 					public void actionPerformed(ActionEvent e){
@@ -237,6 +289,7 @@ public class GUI extends JFrame {
 		}
 		area.append(" --- \n");
 		ArrayList<String> states = progressStates.get(index);
+		System.out.println(states);
 		for(String str : states){
 			area.append(str + "\n");
 		}
@@ -266,6 +319,15 @@ public class GUI extends JFrame {
 
 		return false;
 	}
+	private static boolean checkBeforeReadfile(File file){
+	    if (file.exists()){
+	      if (file.isFile() && file.canRead()){
+	        return true;
+	      }
+	    }
+
+	    return false;
+	  }
 
 
 }
