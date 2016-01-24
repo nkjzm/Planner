@@ -231,10 +231,10 @@ public class PositionManager
 	public void UpdateDisplay() 
 	{
 		float scale = gPlanner.scale;
-		scale = Math.min(scale, 3f/slots.size());
-		scale = Math.min(scale, 3f/table.size());
+		scale = Math.min(scale, 6f/slots.size() * gPlanner.scale);
+		scale = Math.min(scale, 6f/table.size() * gPlanner.scale);
 		for (Stack<Position> stack : table) {
-			scale = Math.min(scale, 2.75f/stack.size());
+			scale = Math.min(scale, 5.5f/stack.size() * gPlanner.scale);
 		}
 		gPlanner.blockScale = scale;
 		gPlanner.UpdateBlockScale();
@@ -249,7 +249,9 @@ public class PositionManager
 			pos.SetPosition(x,y);
 		}
 
-		arm.SetPosition(800 + (int)(20 * gPlanner.blockScale), (int)(124 * gPlanner.blockScale));
+		int armX = 800 + (int)(10 * gPlanner.blockScale / gPlanner.scale);
+		int armY = (int)(62 * gPlanner.blockScale / gPlanner.scale);
+		arm.SetPosition(armX, armY);
 
 		UpdateTable();	//テーブルの内部状態を更新
 		for (Stack<Position> stack : table) {

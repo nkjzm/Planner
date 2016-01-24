@@ -60,7 +60,7 @@ public class GraphicalPlanner extends JPanel
 		tmp.add("C on B");
 		tmp.add("I on C");
 		tmp.add("clear C");
-		tmp.add("holding D");
+		//tmp.add("holding D");
 		aaa.SetBlockArrangement(tmp);
 	}
 
