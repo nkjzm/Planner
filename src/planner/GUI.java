@@ -107,98 +107,98 @@ public class GUI extends JFrame {
 
 		final JLabel label = new JLabel();
 
-	    JPanel labelPanel = new JPanel();
-	    labelPanel.add(label);
+		JPanel labelPanel = new JPanel();
+		labelPanel.add(label);
 
 		JButton btnfile = new JButton("file open");
 		btnfile.setBounds(100,100,160,50);
-		    btnfile.addActionListener(
-		    		new ActionListener(){
-		    			public void actionPerformed(ActionEvent e){
-		    				 JFileChooser filechooser = new JFileChooser();
+		btnfile.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						JFileChooser filechooser = new JFileChooser();
 
-		    				    int selected = filechooser.showOpenDialog(label);
-		    				    if (selected == JFileChooser.APPROVE_OPTION){
-		    				      final File file = filechooser.getSelectedFile();
+						int selected = filechooser.showOpenDialog(label);
+						if (selected == JFileChooser.APPROVE_OPTION){
+							final File file = filechooser.getSelectedFile();
 
-		    				      try{
+							try{
 
-		    				          FileReader filereader = new FileReader(file);
+								FileReader filereader = new FileReader(file);
 
-		    				          int ch;
-		    				          area.setText("");
-		    				          while((ch = filereader.read()) != -1){
-		    				            area.append(String.valueOf((char)ch));
-		    				          }
+								int ch;
+								area.setText("");
+								while((ch = filereader.read()) != -1){
+									area.append(String.valueOf((char)ch));
+								}
 
-		    				          filereader.close();
-		    				        }catch(FileNotFoundException error){
-		    				          System.out.println(error);
-		    				        }catch(IOException error){
-		    				          System.out.println(error);
-		    				        }
+								filereader.close();
+							}catch(FileNotFoundException error){
+								System.out.println(error);
+							}catch(IOException error){
+								System.out.println(error);
+							}
 
-		    				    }
-		    			}
-		    		});
+						}
+					}
+				});
 		contentPane.add(btnfile);
 		contentPane.add(labelPanel);
 
 		JButton btnsave = new JButton("file save");
 		btnsave.setBounds(100,200,160,50);
-			btnsave.addActionListener(
-					new ActionListener(){
-						public void actionPerformed(ActionEvent e){
-							 JFileChooser filechooser = new JFileChooser();
-		    				    int selected = filechooser.showSaveDialog(label);
-		    				    if (selected == JFileChooser.APPROVE_OPTION){
-		    				     final File file = filechooser.getSelectedFile();
-		    				     try{
+		btnsave.addActionListener(
+				new ActionListener(){
+					public void actionPerformed(ActionEvent e){
+						JFileChooser filechooser = new JFileChooser();
+						int selected = filechooser.showSaveDialog(label);
+						if (selected == JFileChooser.APPROVE_OPTION){
+							final File file = filechooser.getSelectedFile();
+							try{
 
-		    				         if (checkBeforeWritefile(file)){
-		    				           FileWriter filewriter = new FileWriter(file);
-		    				           for(int i=0;progressStates.size()>i;i++){
-		    				           ArrayList<String> states = progressStates.get(i);
+								if (checkBeforeWritefile(file)){
+									FileWriter filewriter = new FileWriter(file);
+									for(int i=0;progressStates.size()>i;i++){
+										ArrayList<String> states = progressStates.get(i);
 
-		    				   		for(String str : states){
-		    				   			filewriter.write(str + "\r\n");}
-		    				           }
-		    				           filewriter.close();
-		    				         }else{
-		    				           System.out.println("ファイルに書き込めません");
-		    				         }
-		    				       }catch(IOException error){
-		    				         System.out.println(error);
-		    				       }
-		    				    }}
-					});
-			contentPane.add(btnsave);
+										for(String str : states){
+											filewriter.write(str + "\r\n");}
+									}
+									filewriter.close();
+								}else{
+									System.out.println("ファイルに書き込めません");
+								}
+							}catch(IOException error){
+								System.out.println(error);
+							}
+						}}
+				});
+		contentPane.add(btnsave);
 		ImageIcon icon1 = new ImageIcon("./img/ya.png");
 		JLabel label1 = new JLabel(icon1);
 		label1.setBounds(570, 450, 250, 250);
-			 label1.addMouseListener(new MouseListener()
-			 {
-			 public void mouseClicked(MouseEvent arg0) {
-				 area.setText("");
-					index = 0;
-					Planner planner = new Planner();
-					ArrayList<String> initialState = startArrange.getCurrentState();
-					ArrayList<String> goalList = goalArrange.getCurrentState();
-					planner.start(goalList,initialState);
-					progressStates = planner.ProgressStates;
-					ProgressResult = planner.ProgressResult;
-					lblCount.setText("計" + (progressStates.size()-1) + "回\n");
-					DisplayState();
-			 }
-			 public void mouseEntered(MouseEvent arg0) {
-			 }
-			 public void mouseExited(MouseEvent arg0) {
-			 }
-			 public void mousePressed(MouseEvent arg0) {
-			 }
-			 public void mouseReleased(MouseEvent arg0) {
-			 }
-			 });
+		label1.addMouseListener(new MouseListener()
+		{
+			public void mouseClicked(MouseEvent arg0) {
+				area.setText("");
+				index = 0;
+				Planner planner = new Planner();
+				ArrayList<String> initialState = startArrange.getCurrentState();
+				ArrayList<String> goalList = goalArrange.getCurrentState();
+				planner.start(goalList,initialState);
+				progressStates = planner.ProgressStates;
+				ProgressResult = planner.ProgressResult;
+				lblCount.setText("計" + (progressStates.size()-1) + "回\n");
+				DisplayState();
+			}
+			public void mouseEntered(MouseEvent arg0) {
+			}
+			public void mouseExited(MouseEvent arg0) {
+			}
+			public void mousePressed(MouseEvent arg0) {
+			}
+			public void mouseReleased(MouseEvent arg0) {
+			}
+		});
 
 		contentPane.add(label1);
 
@@ -243,8 +243,8 @@ public class GUI extends JFrame {
 		progressArrange.SetBlockArrangement(new ArrayList<String>(states));
 	}
 	private class myListener extends MouseAdapter{
-	    public void mouseClicked(MouseEvent e){
-	    	area.setText("");
+		public void mouseClicked(MouseEvent e){
+			area.setText("");
 			index = 0;
 			Planner planner = new Planner();
 			ArrayList<String> initialState = startArrange.getCurrentState();
@@ -255,17 +255,17 @@ public class GUI extends JFrame {
 
 
 			DisplayState();
-	    }
-	  }
-	 private static boolean checkBeforeWritefile(File file){
-		    if (file.exists()){
-		      if (file.isFile() && file.canWrite()){
-		        return true;
-		      }
-		    }
+		}
+	}
+	private static boolean checkBeforeWritefile(File file){
+		if (file.exists()){
+			if (file.isFile() && file.canWrite()){
+				return true;
+			}
+		}
 
-		    return false;
-		  }
+		return false;
+	}
 
 
 }

@@ -67,6 +67,7 @@ public class PositionManager
 	public ArrayList<Stack<Position>> table;		
 	public Stack<Position> slots;
 	private GraphicalPlanner gPlanner;
+	public int blockLength;
 	public PositionManager(GraphicalPlanner graphicalPlanner) 
 	{
 		gPlanner = graphicalPlanner;
@@ -79,6 +80,7 @@ public class PositionManager
 		table.get(table.size()-1).add(new Position());
 		slots = new Stack<>();
 		slots.add(new Position());
+		blockLength = arm.emplyLabel.getWidth();
 	}
 	public void AddSlot(String blockId) 
 	{
@@ -87,8 +89,6 @@ public class PositionManager
 		pos.isEmpty = false;
 
 		slots.add(new Position());
-
-		UpdateDisplay();
 	}
 	public void Reset() 
 	{
@@ -130,6 +130,28 @@ public class PositionManager
 			}
 		}
 		slots.add(new Position());
+	}
+	private void UpdateTable() 
+	{
+		Iterator<Stack<Position>> listItr = table.iterator();
+		while (listItr.hasNext()) {
+			Stack<Position> stack = listItr.next();
+			Iterator<Position> stackItr = stack.iterator();
+			while (stackItr.hasNext()) {
+				Position pos = stackItr.next();
+				if(pos.isEmpty){
+					pos.Destroy();
+					stackItr.remove();
+				}
+			}
+			if(stack.empty()){
+				listItr.remove();
+			}else{
+				stack.add(new Position());
+			}
+		}
+		table.add(new Stack<Position>());
+		table.get(table.size()-1).add(new Position());		
 	}
 	public ArrayList<Position> GetAllPosition() 
 	{
@@ -208,43 +230,34 @@ public class PositionManager
 	}
 	public void UpdateDisplay() 
 	{
+		float scale = gPlanner.scale;
+		scale = Math.min(scale, 3f/slots.size());
+		scale = Math.min(scale, 3f/table.size());
+		for (Stack<Position> stack : table) {
+			scale = Math.min(scale, 2.75f/stack.size());
+		}
+		gPlanner.blockScale = scale;
+		gPlanner.UpdateBlockScale();
+		blockLength = arm.emplyLabel.getWidth();
+		
+		int fixedBlockLength = (int)(blockLength/gPlanner.scale);
+		
 		UpdateSlot();	//スロットの内部状態を更新
 		for(Position pos : slots){
-			pos.SetPosition(180 + ((820/slots.size()) * slots.indexOf(pos)),780);
+			int x = 180 + ((920/slots.size()) * slots.indexOf(pos));
+			int y = 908 - fixedBlockLength;
+			pos.SetPosition(x,y);
 		}
-		Position peek = slots.peek();
-		peek.SetPosition(peek.x + (slots.size() * 5), peek.y);
 
-		arm.SetPosition(811, 62);
+		arm.SetPosition(800 + (int)(20 * gPlanner.blockScale), (int)(124 * gPlanner.blockScale));
 
-		Iterator<Stack<Position>> listItr = table.iterator();
-		while (listItr.hasNext()) {
-			Stack<Position> stack = listItr.next();
-			Iterator<Position> stackItr = stack.iterator();
-			while (stackItr.hasNext()) {
-				Position pos = stackItr.next();
-				if(pos.isEmpty){
-					pos.Destroy();
-					stackItr.remove();
-				}
-			}
-			if(stack.empty()){
-				listItr.remove();
-			}else{
-				stack.add(new Position());
-			}
-		}
-		table.add(new Stack<Position>());
-		table.get(table.size()-1).add(new Position());
-
+		UpdateTable();	//テーブルの内部状態を更新
 		for (Stack<Position> stack : table) {
 			for(Position pos : stack){
-				int _x = 220 + ((800/table.size()) * table.indexOf(stack));
-				int _y = 580 - (128 * stack.indexOf(pos));
-				pos.SetPosition(_x,_y);
+				int x = 220 + ((860/table.size()) * table.indexOf(stack));
+				int y = 708 - (fixedBlockLength * (stack.indexOf(pos)+1));
+				pos.SetPosition(x,y);
 			}
 		}
-		Position peekY = table.get(table.size()-1).peek();
-		peekY.SetPosition(peekY.x + (table.size() * 5), peekY.y);
 	}
 }

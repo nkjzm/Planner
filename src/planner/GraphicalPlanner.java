@@ -50,7 +50,8 @@ public class GraphicalPlanner extends JPanel
 		Container c = jframe.getContentPane();
 		c.add(aaa, BorderLayout.CENTER);
 		//ウィンドウのタイトルバーと枠を考慮
-		jframe.getContentPane().setPreferredSize(new Dimension(aaa.getSize().width,aaa.getSize().height));
+		jframe.getContentPane().setPreferredSize(
+				new Dimension(aaa.getSize().width,aaa.getSize().height));
 		jframe.pack();
 
 		ArrayList<String> tmp = new ArrayList<String>();
@@ -133,7 +134,7 @@ public class GraphicalPlanner extends JPanel
 	public void AddBlock() 
 	{
 		char peekBlockId = 'a' - 1;
-		for(int i=0;i<'i'-'a'+1;++i){
+		for(int i=0;i<'p'-'a'+1;++i){
 			++peekBlockId;
 			String blockId = String.valueOf(peekBlockId);
 			Boolean isUse = false;
@@ -168,17 +169,18 @@ public class GraphicalPlanner extends JPanel
 	{
 		ImageIcon icon = new ImageIcon("./img/" + imgName);
 		MediaTracker tracker = new MediaTracker(this);
-		Image smallImg = icon.getImage().getScaledInstance((int) (icon.getIconWidth() * blockScale), -1, Image.SCALE_SMOOTH);
+		Image smallImg = icon.getImage().getScaledInstance(
+				(int) (icon.getIconWidth() * blockScale), -1,Image.SCALE_SMOOTH);
 		tracker.addImage(smallImg, 1);
 		ImageIcon smallIcon = new ImageIcon(smallImg);
 		JLabel label = new JLabel(smallIcon);
-		label.setBounds((int) (x * scale), (int) (y * scale), (int) (smallIcon.getIconWidth()), (int) (smallIcon.getIconHeight()));
+		label.setBounds((int) (x * scale), (int) (y * scale)
+				, smallIcon.getIconWidth(), smallIcon.getIconHeight());
 		return label;
 	}
 
 	public void UpdateBlockScale() 
 	{
-		blockScale *= 0.8;
 		HashMap<String, JLabel> tmpBlocks = new HashMap<>(blocks);
 		Iterator<String> iterator = blocks.keySet().iterator();
 		while(iterator.hasNext()) {
@@ -199,7 +201,6 @@ public class GraphicalPlanner extends JPanel
 		bgPanel.remove(arm);
 		arm = GenerateLabel("arm.png", 800, 0);
 		bgPanel.add(arm);
-		pManager.UpdateDisplay();	
 	}
 
 	private void SetBlock(JLabel label, String Id) 
@@ -397,8 +398,6 @@ public class GraphicalPlanner extends JPanel
 			//最前列に移動
 			blockPanel.add(blocks.get(blockId),0);
 
-			pManager.UpdateDisplay();	//描画状態を更新
-
 			// 押さえたところからラベルの左上の差を取っておく
 			init_x = blocks.get(blockId).getX();
 			init_y = blocks.get(blockId).getY();
@@ -444,13 +443,15 @@ public class GraphicalPlanner extends JPanel
 				pManager.SetBlock(prevPos,blockId,null);
 			}
 			//情報を更新
+			//なんか二回呼ばないといけない・・・
+			pManager.UpdateDisplay();
 			pManager.UpdateDisplay();
 		}
 
 		private boolean IsFit(int x, int y, Position pos) 
 		{
 			// 80 = 64(半径) + 12(遊び)
-			int range = 80;
+			int range = (int)(pManager.blockLength * 1.2f);
 			if (includes(pos.x - range, pos.x + range, (int) (x / scale))
 					&& includes(pos.y - range, pos.y + range, (int) (y / scale))) {
 				return true;
@@ -459,7 +460,7 @@ public class GraphicalPlanner extends JPanel
 		}
 		private boolean IsOnDustbox(int x, int y) 
 		{
-			int range = (int)(dustboxLabels[0].getSize().width * 0.5);
+			int range = (int)(dustboxLabels[0].getSize().width * 1.2f) - pManager.blockLength/2;
 			int posX = dustboxLabels[0].getX();
 			int posY = dustboxLabels[0].getY();
 			if (includes(posX - range, posX + range, x)
@@ -497,9 +498,10 @@ public class GraphicalPlanner extends JPanel
 			if (includes(posX - range, posX + range, x)
 					&& includes(posY - range, posY + range, y)) {
 				AddBlock();
-//				for(String str :getCurrentState()){
-//					System.out.println(str);
-//				}
+				pManager.UpdateDisplay();
+				//				for(String str :getCurrentState()){
+				//					System.out.println(str);
+				//				}
 			}
 		}
 	}
