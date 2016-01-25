@@ -928,6 +928,7 @@ private void initOperators(){
 	 //theCurrentStateから大文字だけ抽出
 	 capital_List=Capital(theCurrentState);
 
+	 /*
 	//Place A on Aなどはfalseを返す
 	 for(String str : theCurrentState){
 		 stateCap_List=Capital_List(str);
@@ -936,6 +937,7 @@ private void initOperators(){
 				 stateCap_List.get(0).equals(stateCap_List.get(1)))
 			 return false;
 	 }
+	 */
 
 	 //System.out.println(capital_List);
 
