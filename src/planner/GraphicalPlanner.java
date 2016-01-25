@@ -34,6 +34,7 @@ public class GraphicalPlanner extends JPanel
 	public float scale;
 	public float blockScale;
 	public int offsetX;
+	private Boolean isFull;
 
 	public JPanel bgPanel;
 	public JPanel blankPanel;
@@ -71,6 +72,7 @@ public class GraphicalPlanner extends JPanel
 
 	public GraphicalPlanner(float scale,boolean isFull) 
 	{
+		this.isFull = isFull;
 		offsetX = -180;
 		int offsetY = -180;
 		if(isFull){
@@ -217,8 +219,10 @@ public class GraphicalPlanner extends JPanel
 		blocks.put(Id, label);
 		// リスナーを登録
 		MyMouseListener listener = new MyMouseListener(Id);
+		if(isFull){
 		label.addMouseListener(listener);
 		label.addMouseMotionListener(listener);
+		}
 		blockPanel.add(label, 0);
 	}
 
@@ -460,7 +464,7 @@ public class GraphicalPlanner extends JPanel
 		private boolean IsFit(int x, int y, Position pos) 
 		{
 			// 80 = 64(半径) + 12(遊び)
-			int range = (int)(pManager.blockLength * 1.2f);
+			int range = (int)(pManager.blockLength * 1.8f);
 			if (includes(pos.x - range, pos.x + range, (int) (x / scale))
 					&& includes(pos.y - range, pos.y + range, (int) (y / scale))) {
 				return true;
