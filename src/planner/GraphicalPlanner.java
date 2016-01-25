@@ -379,6 +379,7 @@ public class GraphicalPlanner extends JPanel
 			if(IsOnDustbox(x, y)){
 				dustboxLabels[0].setVisible(false);
 				dustboxLabels[1].setVisible(true);
+				swapLabel.setVisible(false);
 				return;
 			}
 			dustboxLabels[0].setVisible(true);
