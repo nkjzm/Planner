@@ -22,7 +22,7 @@ public class Planner {
  public ArrayList<String> ProgressResult;
 
  private int count;
- private int max = 100;
+ private int max = 1000;
 
  public static void main(String[] args){
 	 Planner aPlanner = new Planner();

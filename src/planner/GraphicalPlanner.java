@@ -46,7 +46,7 @@ public class GraphicalPlanner extends JPanel
 
 	public static void main(String args[]) 
 	{
-		GraphicalPlanner aaa = new GraphicalPlanner(0.6f,true);
+		GraphicalPlanner aaa = new GraphicalPlanner(0.3f,true);
 		JFrame jframe = new JFrame("DrawRect");
 		jframe.setVisible(true);
 		Container c = jframe.getContentPane();
