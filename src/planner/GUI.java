@@ -324,34 +324,6 @@ public class GUI extends JFrame {
 					}
 				});
 		contentPane.add(btnRandom);
-		ImageIcon icon1 = new ImageIcon("./img/ya.png");
-		JLabel label1 = new JLabel(icon1);
-		label1.setBounds(500, 450, 260, 250);
-		label1.addMouseListener(new MouseListener()
-		{
-			public void mouseClicked(MouseEvent arg0) {
-				area.setText("");
-				index = 0;
-				Planner planner = new Planner();
-				ArrayList<String> initialState = startArrange.getCurrentState();
-				ArrayList<String> goalList = goalArrange.getCurrentState();
-				planner.start(goalList,initialState);
-				progressStates = planner.ProgressStates;
-				ProgressResult = planner.ProgressResult;
-				lblCount.setText("計" + (progressStates.size()-1) + "回\n");
-				DisplayState();
-			}
-			public void mouseEntered(MouseEvent arg0) {
-			}
-			public void mouseExited(MouseEvent arg0) {
-			}
-			public void mousePressed(MouseEvent arg0) {
-			}
-			public void mouseReleased(MouseEvent arg0) {
-			}
-		});
-
-		contentPane.add(label1);
 
 
 
@@ -426,7 +398,14 @@ public class GUI extends JFrame {
 			Planner planner = new Planner();
 			ArrayList<String> initialState = startArrange.getCurrentState();
 			ArrayList<String> goalList = goalArrange.getCurrentState();
-			planner.start(goalList,initialState);
+			if(planner.start(goalList,initialState)){
+			}else{
+				area.setText("ブロック数が一致しません");
+				progressStates = null;
+				ProgressResult = null;
+				lblCount.setText("エラーが発生しました");
+				return;
+			}
 			progressStates = planner.ProgressStates;
 			ProgressResult = planner.ProgressResult;
 			lblCount.setText("計" + (progressStates.size()-1) + "回\n");
