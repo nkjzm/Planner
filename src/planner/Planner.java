@@ -920,8 +920,10 @@ private void initOperators(){
 	 ArrayList<String> stateCap_List = new ArrayList<String>();
 
 	 //theCurrentStateに重複がある場合はfalse
-	 if(overlapCheck(theCurrentState))
+	 if(overlapCheck(theCurrentState)){
+		 System.out.println(theCurrentState);
 		 return false;
+	 }
 
 	 //theCurrentStateから大文字だけ抽出
 	 capital_List=Capital(theCurrentState);
@@ -983,6 +985,7 @@ private boolean overlapCheck(ArrayList<String>checkList){
 	HashSet<String> checkHash = new HashSet<String>();
 
 	for(String str: checkList){
+
 		if(checkHash.contains(str)){
 			result = true;
 			break;
@@ -990,6 +993,7 @@ private boolean overlapCheck(ArrayList<String>checkList){
 			checkHash.add(str);
 		}
 	}
+	System.out.println(checkHash);
 	return result;
 }
 
