@@ -49,6 +49,7 @@ public class Planner {
 	  *
 	  *それぞれのゴール要素をADDリストに持つオペレータを1つずつ決定する
 	  */
+
 	 ArrayList<Operator> theOperators = new ArrayList<Operator>();
 	 HashMap<Operator,String> operatorsMap = new HashMap<Operator,String>();
 	 for(int i = 0; i < goalList.size(); ++i){
@@ -237,19 +238,36 @@ public class Planner {
 	 }
  }
 
- public void start(ArrayList<String> goalList,
+ public boolean start(ArrayList<String> goalList,
 		 		   ArrayList<String> initialState){
+
+	 HashSet<String> Capital_start= new HashSet<String>();
+	 HashSet<String> Capital_goal = new HashSet<String>();
+
+	 Capital_start=Capital(goalList);
+	 Capital_goal=Capital(initialState);
+
+	 //ゴールとスタートでブロックの個数が異なるときはfalseを返す
+	 if(Capital_start.size()!= Capital_goal.size()){
+		// System.out.println(Capital_start);
+		//System.out.println(Capital_goal);
+
+		 return false;
+	 }
+
 
   HashMap<String,String> theBinding = new HashMap<String,String>();
   plan = new ArrayList<Operator>();
   ProgressResult = new ArrayList<String>();
   ProgressStates = new ArrayList<ArrayList<String>>();
 
+
+
   //goalList,initialStateは出力のためバックアップとっておく。
   ArrayList<String> goalList_backup = new ArrayList<String>(goalList);
   ArrayList<String> initialState_backup = new ArrayList<String>(initialState);
   ProgressStates.add(initialState_backup);
-  
+
   initOperators();
   staticPrioritySet();
   sortGoals(goalList);
@@ -286,6 +304,7 @@ public class Planner {
   }
 
 
+  return true;
   }
 
  /*
@@ -560,7 +579,7 @@ public class Planner {
 					 plan.add(orgPlan.get(k));
 				 }
 			 }
-		 }
+		 	}
 		 }
 		 }
 	 }
@@ -892,20 +911,28 @@ private void initOperators(){
  * 現状態(theCurrentState)からデリートする際に、存在しないものをデリート対象になっても
  * エラーがでないようになっていたため、おかしなオペレーターが選択されていた。
  * それを防ぐために、プランニング前にオペレーターをチェックするようにした。
- * 具体的には、ontable Xがあるときは、　remove　X のオペレーターが選択されることはない。
+ * 具体的には、ontable Xがあるときは、remove_X のオペレーターが選択されることはない。
  * 選択されるとしたら　pick　up Xのほうである。　
 */
 
  private boolean opCheck(Operator op,ArrayList<String> theCurrentState){
 	 HashSet<String> capital_List = new HashSet<String>();
-	//大文字のA~Z
-	 Pattern p = Pattern.compile("[A-Z]");
+	 ArrayList<String> stateCap_List = new ArrayList<String>();
 
-	 for(String State : theCurrentState){
-		 Matcher m = p.matcher(State);
-	 		while(m.find()){
-	 			capital_List.add(m.group());
-	 		}
+	 //theCurrentStateに重複がある場合はfalse
+	 if(overlapCheck(theCurrentState))
+		 return false;
+
+	 //theCurrentStateから大文字だけ抽出
+	 capital_List=Capital(theCurrentState);
+
+	//Place A on Aなどはfalseを返す
+	 for(String str : theCurrentState){
+		 stateCap_List=Capital_List(str);
+	//	 System.out.println(stateCap_List);
+		 if(stateCap_List.size()==2 &&
+				 stateCap_List.get(0).equals(stateCap_List.get(1)))
+			 return false;
 	 }
 
 	 //System.out.println(capital_List);
@@ -917,12 +944,57 @@ private void initOperators(){
 			return false;
 		 	}
 	 	}
+
 	 return true;
 	}
 
- }
+ //List内の大文字[A-Z]を重複なしで返す関数
+private HashSet<String> Capital(ArrayList<String> List){
+
+	HashSet<String> Capital = new HashSet<String>();
+	Pattern p = Pattern.compile("[A-Z]");
+
+	for(String State : List){
+		Matcher m = p.matcher(State);
+		while(m.find()){
+			Capital.add(m.group());
+		}
+	}
+
+	return Capital;
+}
+//str内の大文字[A-Z]を重複ありで返す関数
+private ArrayList<String> Capital_List(String str){
+
+	ArrayList<String> Capital_List = new ArrayList<String>();
+	Pattern p = Pattern.compile("[A-Z]");
+	Matcher m = p.matcher(str);
+
+	while(m.find()){
+		Capital_List.add(m.group());
+	}
+	return Capital_List;
+
+	}
+
+//List内に重複があるかないか判定する
+private boolean overlapCheck(ArrayList<String>checkList){
+	Boolean result = false;
+	HashSet<String> checkHash = new HashSet<String>();
+
+	for(String str: checkList){
+		if(checkHash.contains(str)){
+			result = true;
+			break;
+		}else{
+			checkHash.add(str);
+		}
+	}
+	return result;
+}
 
 
+}
 class Operator{
     String name;
     ArrayList<String> ifList;
