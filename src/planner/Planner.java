@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -16,13 +15,12 @@ public class Planner {
  private ArrayList<String> preInstantiations;
  private ArrayList<String> preGoals;
  private ArrayList<String> allGoals ;
- static Random rand;
  private ArrayList<Operator> plan;
  public ArrayList<ArrayList<String>> ProgressStates;
  public ArrayList<String> ProgressResult;
 
  private int count;
- private int max = 1000;
+ private int max = 100;
 
  public static void main(String[] args){
 	 Planner aPlanner = new Planner();
@@ -32,7 +30,6 @@ public class Planner {
  }
 
  Planner(){
-  rand = new Random();
   preInstantiations = new ArrayList<String>();
   preGoals = new ArrayList<String>();
   allGoals = new ArrayList<String>();
@@ -44,6 +41,7 @@ public class Planner {
   * @param	ゴールリストを表すArrayList<String> goalList
   */
  public void sortGoals(ArrayList<String> goalList){
+	 if(goalList.size()==1) return;
 	 /*
 	  * step 1
 	  *
@@ -261,9 +259,7 @@ public class Planner {
   ProgressResult = new ArrayList<String>();
   ProgressStates = new ArrayList<ArrayList<String>>();
 
-
-
-  //goalList,initialStateは出力のためバックアップとっておく。
+//goalList,initialStateは出力のためバックアップとっておく。
   ArrayList<String> goalList_backup = new ArrayList<String>(goalList);
   ArrayList<String> initialState_backup = new ArrayList<String>(initialState);
   ProgressStates.add(initialState_backup);
@@ -376,6 +372,10 @@ public class Planner {
 		 for(int i = 0; i < theCurrentState.size() ; i++){
 			 orgState.add(theCurrentState.get(i));
 		 }
+		 ArrayList<String> orgGoals = new ArrayList<String>();
+	        for(int i = 0; i < theGoalList.size(); ++i){
+	        	orgGoals.add(theGoalList.get(i));
+	        }
 
 		 int tmpPoint = planningAGoal(aGoal,theGoalList,theCurrentState,theBinding,cPoint);
 
@@ -421,6 +421,10 @@ public class Planner {
 					 for(int i = 0 ; i < orgState.size() ; i++){
 						 theCurrentState.add(orgState.get(i));
 					 }
+					 theGoalList.clear();
+					 for(int i = 0; i<orgGoals.size(); i++){
+						 theGoalList.add(orgGoals.get(i));
+					 }
 				 }
 			 }
 		 } else {
@@ -434,6 +438,10 @@ public class Planner {
 			 for(int i = 0 ; i < orgState.size() ; i++){
 				 theCurrentState.add(orgState.get(i));
 			 }
+			 theGoalList.clear();
+	            for(int i = 0; i < orgGoals.size(); ++i){
+	            	theGoalList.add(orgGoals.get(i));
+	            }
 			 return false;
 		 }
 		 }
@@ -535,9 +543,8 @@ public class Planner {
 
 			 System.out.println("newOp:"+newOperator.name);
 			 System.out.println("newBind:"+newBinding);
+			 System.out.println(theCurrentState);
 
-			 //プランニングの前にオペレーターをチェック
-		if(opCheck(newOperator,theCurrentState)){
 			 if(planning(newGoals,theCurrentState,newBinding)){
 				 newOperator = newOperator.instantiate(newBinding);
 				 System.out.println(newOperator.name);
@@ -582,7 +589,6 @@ public class Planner {
 		 	}
 		 }
 		 }
-	 }
 	 return -1;
  }
 
@@ -907,50 +913,6 @@ private void initOperators(){
      operators.add(operator4);
  }
 
-/*バグの原因はapplyStateで、オペレーターのdeleteリストを使い、
- * 現状態(theCurrentState)からデリートする際に、存在しないものをデリート対象になっても
- * エラーがでないようになっていたため、おかしなオペレーターが選択されていた。
- * それを防ぐために、プランニング前にオペレーターをチェックするようにした。
- * 具体的には、ontable Xがあるときは、remove_X のオペレーターが選択されることはない。
- * 選択されるとしたら　pick　up Xのほうである。　
-*/
-
- private boolean opCheck(Operator op,ArrayList<String> theCurrentState){
-	 HashSet<String> capital_List = new HashSet<String>();
-	 ArrayList<String> stateCap_List = new ArrayList<String>();
-
-	 //theCurrentStateに重複がある場合はfalse
-	 if(overlapCheck(theCurrentState)){
-		 System.out.println(theCurrentState);
-		 return false;
-	 }
-
-	 //theCurrentStateから大文字だけ抽出
-	 capital_List=Capital(theCurrentState);
-
-	 /*
-	//Place A on Aなどはfalseを返す
-	 for(String str : theCurrentState){
-		 stateCap_List=Capital_List(str);
-	//	 System.out.println(stateCap_List);
-		 if(stateCap_List.size()==2 &&
-				 stateCap_List.get(0).equals(stateCap_List.get(1)))
-			 return false;
-	 }
-	 */
-
-	 //System.out.println(capital_List);
-
-	 for(String s : capital_List){
-		 String ontable_X =  "ontable " + s;
-		 String remove_X = "remove " + s;
-		 if(theCurrentState.contains(ontable_X)&&op.name.startsWith(remove_X)){
-			return false;
-		 	}
-	 	}
-
-	 return true;
-	}
 
  //List内の大文字[A-Z]を重複なしで返す関数
 private HashSet<String> Capital(ArrayList<String> List){
@@ -967,39 +929,6 @@ private HashSet<String> Capital(ArrayList<String> List){
 
 	return Capital;
 }
-//str内の大文字[A-Z]を重複ありで返す関数
-private ArrayList<String> Capital_List(String str){
-
-	ArrayList<String> Capital_List = new ArrayList<String>();
-	Pattern p = Pattern.compile("[A-Z]");
-	Matcher m = p.matcher(str);
-
-	while(m.find()){
-		Capital_List.add(m.group());
-	}
-	return Capital_List;
-
-	}
-
-//List内に重複があるかないか判定する
-private boolean overlapCheck(ArrayList<String>checkList){
-	Boolean result = false;
-	HashSet<String> checkHash = new HashSet<String>();
-
-	for(String str: checkList){
-
-		if(checkHash.contains(str)){
-			result = true;
-			break;
-		}else{
-			checkHash.add(str);
-		}
-	}
-	System.out.println(checkHash);
-	return result;
-}
-
-
 }
 class Operator{
     String name;
@@ -1058,12 +987,7 @@ class Operator{
     	}
 
     	for(int i = 0 ; i < deleteList.size() ; i++){
-    	   // if(theState.remove(deleteList.get(i))){}
-    	    //else{
-    	    	//theState.clear();
-    	    	//return theState;
     	    theState.remove(deleteList.get(i));
-
     	    }
 
     	return theState;
