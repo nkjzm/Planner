@@ -432,6 +432,15 @@ public class GUI extends JFrame {
 	    return false;
 	  }
 
+	/**
+	 * 
+	 */
+	/**
+	 * 
+	 */
+	/**
+	 * 
+	 */
 	public void Random(){
 		ArrayList<String> list = new ArrayList<String>();
 		list.clear();
